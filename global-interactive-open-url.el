@@ -35,7 +35,7 @@
   (global-interactive-open-url-init)
   (cond ((stringp url-expr) (shell-command (format "open \"%s\"" url-expr)))
         ((vectorp url-expr) 
-         (lexical-let* ((keys (mapcar #'car url-expr))
+         (let* ((keys (mapcar #'car url-expr))
                         (selected-item (completing-read "Choose Url label: " (global-interactive--keys-to-names keys)))
                         (key (global-interactive--find-key selected-item keys))
                         (url-expr (global-interactive--find-value-in-vector-by-key key url-expr))
@@ -44,7 +44,7 @@
              (message (format "fuckdsfsf:%s" url-expr))
              (global-interactive-open-url url-expr))))
         ((not url-expr) 
-         (lexical-let* 
+         (let* 
              ((url-plist global-interactive-url-plist)
               (keys (seq-filter #'symbolp global-interactive-url-plist))
               (selected-item (completing-read "Choose Url label: " (global-interactive--keys-to-names keys)))
@@ -53,8 +53,6 @@
            (when url-expr
              (global-interactive-open-url url-expr))))))
 
+
+
 (provide 'global-interactive-open-url)
-
-
-(plist-get global-interactive-url-plist :login)
-(seq-filter (lambda (value) (eq :login (car value))) (plist-get global-interactive-url-plist :login))

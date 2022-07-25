@@ -1,3 +1,4 @@
+(require 'subr-x)
 (defvar global-interactive-default-command nil)
 
 (defvar global-interactive-extensions-init nil)
@@ -8,12 +9,10 @@ Useful for system-wide scripts."
   (with-temp-buffer
     (thread-first
       (cond
-       ((functionp items)
-        (funcall items "" nil t))
-       ((listp (car items))
-        (mapcar #'car items))
-       (t
-        items))
+       ((functionp items) 
+        (message (format "%s" (funcall items "" nil t))))
+       ((listp (car items)) (mapcar #'car items))
+       (t items))
       (string-join "\n")
       string-trim
       insert)
@@ -29,7 +28,6 @@ Useful for system-wide scripts."
 (defun global-interactive-emacs ()
   (interactive)
   (setq completing-read-function #'global-interactive-choose)
-  (mapc #'funcall global-interactive-extensions-init)
   (lexical-let* ((candidates (mapcar #'car global-interactive-default-command))
                  (selected-item (completing-read "" candidates))
                  (command (seq-filter (lambda (command) (string= selected-item (car command))) global-interactive-default-command)))
