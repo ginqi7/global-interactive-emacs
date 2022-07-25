@@ -1,0 +1,119 @@
+#+title: Global Interactive Emacs
+#+author: Qiqi Jin
+#+language: en
+
+This tool is inspired by article : [[https://isamert.net/2022/03/16/global-interactive-emacs-functions.html][Global interactive Emacs functions]].It provides an idea to run Emacs functions outside of Emacs.
+
+So I try to use this idea to wrtie a tool like [[https://www.obdev.at/products/launchbar/index.html][lauchbar]] or [[https://www.alfredapp.com/][Alfred]] . It can help user to quickly lauch app or run work flow.  
+
+I'm using it to replace the lauchbar.
+
+* Pros and cons
+
+This toole has some pros and cons, and I think if you have the following needs, you can try to use it :
+
++ you don't want pay for other tools like [[https://www.obdev.at/products/launchbar/index.html][lauchbar]] or [[https://www.alfredapp.com/][Alfred]] .
++ you wish some function in Emacs could run out of Emacs.
++ You're familiar with Emacs, there are some plugins, and custom functions that you want to reuse.
++ You don't want to learn a new language or workflow of a new software
++ ...
+
+** Pros
++ *free*: Whether Lauchbar or Alfred, you need to pay for it to use it comfortably and efficiently. Just need =Emacs= and some open source software that you can use for free.
++ *consistency*: You can use the same features inside or outside of Emacs and have a similar experience.
++ *Simple Configuration*: If you are familiar with Emacs, you can easily configure it with emacs-lisp without having to relearn the language and process of other tools.
++ *Scalability*: You can write your own interactive functions and plug them into the tool, or use the Emacs plugins developed by others to extract the interaction functions and plug them into the tool.
+
+** Cons
++ *Not powerful for now*: Obviously, the tool is not as powerful as lauchbar or Alfred. At the moment it is only useful for my own needs. I will continue to improve according to my needs, and anyone is welcome to help improve it.
++ *Can't perfectly support all Emacs interactive functions*: There are currently some Emacs interaction functions that cannot be run outside of Emacs, such as =execute-extended-command=. I don't have the train of thought to support it yet.
+
+* Prerequisites
++ choose 
+
+[[git@github.com:chipsenkbeil/choose.git][choose github]]
+
+=Global Interactive Emacs= use it as interface to interactively communicate with Emacs.
+
+Maybe using rofi is okay in Linux, but I only have Mac OS and can't test it.
+
+* Installing
+
++ clone the project in your own emacs configuration files directory, like:
+#+BEGIN_SRC sh
+  git clone git@github.com:ginqi7/global-interactive-emacs.git ~/.emacs.d/lisp/global-interactive-emacs
+#+END_SRC
+
++ add the path to 'load-path'
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp/d/lisp/global-interactive-emacs"))
+#+END_SRC
+
+* Configuration
+I split different functions into different files, you can choose by your needs.
+
+#+BEGIN_SRC emacs-lisp
+(require 'global-interactive-emacs)
+(require 'global-interactive-run-app)
+(require 'global-interactive-open-url)
+(require 'global-interactive-leetcode)
+(require 'global-interactive-kubectl)
+#+end_src
+
+** global-interactive-run-app
+You could run 'global-interactive-run-app-init' in your init file, it will find your apps in your '/Applications' directory. If you don't run it manual, it will be called in your first choose lauch some apps.
+#+begin_src emacs-lisp
+(global-interactive-run-app-init)
+#+end_src
+
+** global-interactive-open-url
+You could define some urls to quickly jump to selected url. the configuration is using yaml file or emacs plist.
+
+If you use emacs plist to define urls: 
+#+begin_src emacs-lisp
+  (setq global-interactive-url-plist (:movie
+ [(:Doctor\ Strange\ in\ the\ Multiverse\ of\ Madness "https://www.imdb.com/title/tt9419884/?ref_=hm_fanfav_tt_t_1_pd_fp1")
+  (:The\ Batman "https://www.imdb.com/title/tt1877830/?ref_=hm_tpks_tt_t_2_pd_tp1_pbr_ic")]
+ :music
+ [(:jay\ chou "https://www.wikiwand.com/en/List_of_songs_recorded_by_Jay_Chou")])
+#+end_src
+
+If you use yaml to define urls:
++ you need add package: [[https://github.com/zkry/yaml.el][yaml]]
++ you need save yaml config to a file. it values like:
+#+begin_src yaml
+  movie:
+  - Doctor Strange in the Multiverse of Madness: https://www.imdb.com/title/tt9419884/?ref_=hm_fanfav_tt_t_1_pd_fp1
+  - The Batman: https://www.imdb.com/title/tt1877830/?ref_=hm_tpks_tt_t_2_pd_tp1_pbr_ic
+music:
+  - jay chou: https://www.wikiwand.com/en/List_of_songs_recorded_by_Jay_Chou
+#+end_src
++ you need config parameter 'global-interactive-url-yaml-path'
+
+  #+begin_src emacs-lisp
+    (setq global-interactive-url-yaml-path "some path to yaml file")
+  #+end_src
+
+* Features
+
+** global-interactive-run-app
+You could quickly launch apps in you MacOS.
+
+#+HTML: <p align="center"><img width="600px" src="./example/global-interactive-run-app.gif"></p>
+
+** global-interactive-open-url
+You could quickly jump pre define urls.
+#+HTML: <p align="center"><img width="600px" src="./example/global-interactive-open-url.gif"></p>
+
+** global-interactive-kubectl
+You could conbine other Emacs plugin, have a similar experience in or out of Emacs.
+
+The kubectl plugin is [[https://github.com/ginqi7/kubectl-emacs][here]].
+
+#+HTML: <p align="center"><img width="600px" src="./example/global-interactive-kubectl.gif"></p>
+
+** global-interactive-leetcode
+
+The leetcode plugin is [[https://github.com/ginqi7/leetcode-emacs][here]].
+
+#+HTML: <p align="center"><img width="600px" src="./example/global-interactive-leetcode.gif"></p>
