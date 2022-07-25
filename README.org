@@ -58,6 +58,7 @@ I split different functions into different files, you can choose by your needs.
 (require 'global-interactive-open-url)
 (require 'global-interactive-leetcode)
 (require 'global-interactive-kubectl)
+(require 'global-interactive-youdao-dictionary)
 #+end_src
 
 ** global-interactive-run-app
@@ -128,3 +129,15 @@ The kubectl plugin is [[https://github.com/ginqi7/kubectl-emacs][here]].
 The leetcode plugin is [[https://github.com/ginqi7/leetcode-emacs][here]].
 
 #+HTML: <p align="center"><img width="600px" src="./example/global-interactive-leetcode.gif"></p>
+
+** global-interactive-youdao-dictionary
+
+The youdao-dictionary plugin is [[https://github.com/xuchunyang/youdao-dictionary.el][here]].
+
+You could using it to transalte word, and copy the translated value.
+
+#+HTML: <p align="center"><img width="600px" src="./example/global-interactive-youdao-dictionary.gif"></p>
+
+If you don't select any item, it will copy the whole translation.
+
+If you selete one line, it will copy the line.

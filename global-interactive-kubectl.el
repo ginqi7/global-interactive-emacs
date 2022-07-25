@@ -3,3 +3,4 @@
 (add-to-list 'global-interactive-default-command (list "Kubectl" #'k8s-get-interactive))
 
 (provide 'global-interactive-kubectl)
+
