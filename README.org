@@ -31,7 +31,7 @@ This toole has some pros and cons, and I think if you have the following needs, 
 * Prerequisites
 + choose 
 
-[[git@github.com:chipsenkbeil/choose.git][choose github]]
+[[https://github.com/chipsenkbeil/choose][choose github]]
 
 =Global Interactive Emacs= use it as interface to interactively communicate with Emacs.
 
