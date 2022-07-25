@@ -94,6 +94,17 @@ music:
     (setq global-interactive-url-yaml-path "some path to yaml file")
   #+end_src
 
+* Usage
+
+After you install and configurate this tool. you need start emacs server, and run:
+#+begin_src shell
+  emacsclient --eval "(global-interactive-emacs)"
+#+end_src
+
+If successfully run, you could use some tool to bind the command in a hotkey.
+
+I use [[https://github.com/kasper/phoenix][phoenix]] to bind the command to "cmd + space".
+
 * Features
 
 ** global-interactive-run-app
