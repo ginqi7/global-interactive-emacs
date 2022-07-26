@@ -53,6 +53,13 @@
            (when url-expr
              (global-interactive-open-url url-expr))))))
 
-
+(defun global-interactive-open-url-update ()
+  (interactive)
+  (when global-interactive-url-yaml-path 
+    (require 'yaml)
+    (setq global-interactive-url-plist (yaml-parse-string (file-to-string global-interactive-url-yaml-path)
+                                                          :object-type 'plist
+                                                          :sequence-type 'array
+                                                          :null-object :empty))))
 
 (provide 'global-interactive-open-url)
