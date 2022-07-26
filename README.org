@@ -95,6 +95,31 @@ music:
     (setq global-interactive-url-yaml-path "some path to yaml file")
   #+end_src
 
+** global-interactive-web-search
+Define some search engine, and input some text to query.
+You could define some urls to quickly jump to selected url. the configuration is using yaml file or emacs plist.
+
+If you use emacs plist to define urls: 
+#+begin_src emacs-lisp
+  (setq global-interactive-web-search-plist (:Google "https://www.google.com/search?q=${param}" :Zhihu "https://www.zhihu.com/search?type=content&q=${param}")
+#+end_src
+
+using ${param} as placeholder, it will replace you input text. 
+
+If you use yaml to define urls:
++ you need add package: [[https://github.com/zkry/yaml.el][yaml]]
++ you need save yaml config to a file. it values like:
+#+begin_src yaml
+Google: https://www.google.com/search?q=${param}
+Zhihu: https://www.zhihu.com/search?type=content&q=${param}
+#+end_src
++ you need config parameter 'global-interactive-web-search-yaml-path'
+
+  #+begin_src emacs-lisp
+    (setq global-interactive-web-search-yaml-path "some path to yaml file")
+  #+end_src
+
+
 * Usage
 
 After you install and configurate this tool. you need start emacs server, and run:
@@ -141,3 +166,8 @@ You could using it to transalte word, and copy the translated value.
 If you don't select any item, it will copy the whole translation.
 
 If you selete one line, it will copy the line.
+
+** global-interactive-web-search
+Define some search engine, and input some text to query.
+#+HTML: <p align="center"><img width="600px" src="./example/global-interactive-web-search.gif"></p>
+
