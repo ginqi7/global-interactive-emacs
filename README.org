@@ -53,12 +53,14 @@ Maybe using rofi is okay in Linux, but I only have Mac OS and can't test it.
 I split different functions into different files, you can choose by your needs.
 
 #+BEGIN_SRC emacs-lisp
-(require 'global-interactive-emacs)
-(require 'global-interactive-run-app)
-(require 'global-interactive-open-url)
-(require 'global-interactive-leetcode)
-(require 'global-interactive-kubectl)
-(require 'global-interactive-youdao-dictionary)
+  (require 'global-interactive-emacs)
+  (require 'global-interactive-run-app)
+  (require 'global-interactive-open-url)
+  (require 'global-interactive-leetcode)
+  (require 'global-interactive-kubectl)
+  (require 'global-interactive-youdao-dictionary)
+  (require 'global-interactive-web-search)
+  (require 'global-interactive-send-request)
 #+end_src
 
 ** global-interactive-run-app
@@ -119,6 +121,12 @@ Zhihu: https://www.zhihu.com/search?type=content&q=${param}
     (setq global-interactive-web-search-yaml-path "some path to yaml file")
   #+end_src
 
+** global-interactive-send-request
+send_request need a python package [[https://github.com/n8henrie/pycookiecheat][pycookiecheat]] . It could get chrome cookies. so I write a python script =send_request.py=, it can get chrome cookie and send request to a website.
+
+#+begin_src emacs-lisp
+(setq global-interactive-python-shell-path "some_path/send_request.py")
+#+end_src
 
 * Usage
 
@@ -133,6 +141,18 @@ I use [[https://github.com/kasper/phoenix][phoenix]] to bind the command to "cmd
 
 * Features
 
++ *global-interactive-select-from-clipboard*: select text from =kill-ring= and clipboard.
++ *global-interactive-run-app*: launch installed MaOS app.
++ *global-interactive-open-url*: using browser to open pre-define urls.
++ *global-interactive-leetcode*: interactively query and show leetcode problem.
++ *global-interactive-kubectl*: interactively query and open k8s resource config.
++ *global-interactive-youdao-dictionary*: transalte word by youdao dictionary.
++ *global-interactive-web-search*: using browser to query info by pre-define search engine.
++ *global-interactive-send-request*: send http request with chrome cookie, and parse it's json response.
+* Example
+** global-interactive-select-from-clipboard
+
+#+HTML: <p align="center"><img width="600px" src="./example/global-interactive-select-from-clipboard.gif"></p>
 ** global-interactive-run-app
 You could quickly launch apps in you MacOS.
 
@@ -170,4 +190,15 @@ If you selete one line, it will copy the line.
 ** global-interactive-web-search
 Define some search engine, and input some text to query.
 #+HTML: <p align="center"><img width="600px" src="./example/global-interactive-web-search.gif"></p>
+
+** global-interactive-send-request
+#+HTML: <p align="center"><img width="600px" src="./example/global-interactive-send-request.gif"></p>
+
++ the request will use chrome cookies. So once you're logged into a website in Chrome, you can query the interface with permission verification directly through =global-interactive-send-request=.
++ it support =get= and =post= method.
++ it could select text from =king-ring= as url or body.
++ it could parse json response, and interactively preview the response body.
++ every time interactively select a json part, it will copy the json.
+
+  
 
