@@ -7,6 +7,23 @@
 
 (defvar global-interactive-select-from-the-clipboard "Select from the clipboard 📋")
 
+(defun global-interactive-select-from-clipboard (selected-item &optional copy)
+  (setq selected-item (if (string= selected-item global-interactive-select-from-the-clipboard)
+                          (progn 
+                            (setq copy t)
+                            (when (not (eq (car kill-ring) (x-get-clipboard)))
+                              (kill-new (x-get-clipboard)))
+                            (completing-read "Select text from clipboard: " (delq nil (delete-dups kill-ring))))
+                        selected-item))
+  (when copy
+    (kill-new selected-item))
+  selected-item)
+
+(defun global-interactive-read (prompt items)
+  (global-interactive-select-from-clipboard 
+   (completing-read prompt (append items (list global-interactive-select-from-the-clipboard)))))
+
+
 (defun global-interactive-choose (prompt items &rest ignored)
   "Like `completing-read' but instead use dmenu.
 Useful for system-wide scripts."
@@ -33,7 +50,7 @@ Useful for system-wide scripts."
   (interactive)
   (setq completing-read-function #'global-interactive-choose)
   (lexical-let* ((candidates (mapcar #'car global-interactive-default-command))
-                 (selected-item (completing-read "" candidates))
+                 (selected-item (global-interactive-read "" candidates))
                  (command (seq-filter (lambda (command) (string= selected-item (car command))) global-interactive-default-command)))
     
     (when command

@@ -3,12 +3,6 @@
 
 (defvar global-interactive-python-shell-path nil)
 
-
-
-
-(defun global-interactive--get-fullpath (file-relative-path)
-  (concat (file-name-directory (or load-file-name buffer-file-name)) file-relative-path))
-
 (defun global-interactive--json-to-preview(json)
   "Simplify preview json if is too long"
   (let* ((json-str (json-serialize json)))
@@ -17,7 +11,6 @@
               ((vectorp json) (format "%s...]" (substring json-str 0 40)))
               (t (format "..." (substring json-str 0 40))))
       json-str)))
-
 
 (defun global-interactive--json-to-candidates (json)
   "Convert Json Item to interactive candidates"
@@ -31,7 +24,10 @@
 
 (defun global-interactive--parse-json (last-json json)
   "Parse Response Json and interactive copy"
-  (kill-new (json-serialize json))
+  (let ((json-str (json-serialize json)))
+    (when (not (string= "{}" json-str))
+      (kill-new (json-serialize json))))
+  
   (let* ((candidates (global-interactive--json-to-candidates json))
          (selected-item (completing-read "Response: " candidates))
          (key (car (split-string selected-item ":" t " +"))))
@@ -39,20 +35,13 @@
           ((hash-table-p json) (global-interactive--parse-json json (gethash key json)))
           ((vectorp json) (global-interactive--parse-json json (elt json (string-to-number key)))))))
 
-(defun global-interactive-select-from-clipboard (selected-item)
-  (if (string= selected-item global-interactive-select-from-the-clipboard)
-      (completing-read "Select text from clipboard: " kill-ring)
-    selected-item))
-
 (defun global-interactive-send-request ()
   "Send request with chrome cookie"
   (interactive)
   (if global-interactive-python-shell-path
       (let* ((method (completing-read "Selected Request Method: " '("GET" "POST")))
-             (url (completing-read "Please Input URL: " (list "Please Input URL:" global-interactive-select-from-the-clipboard)))
-             (url (global-interactive-select-from-clipboard url))
-             (body (when (string= method "POST") (completing-read "Please Input Body: " (list "Please Input Body: " global-interactive-select-from-the-clipboard))))
-             (body (global-interactive-select-from-clipboard body))
+             (url (global-interactive-read "Please Input URL: " '("Please Input URL:")))
+             (body (when (string= method "POST") (global-interactive-read "Please Input Body: " '("Please Input Body: "))))
              (command (format "python3 %s %s %s '%s'" global-interactive-python-shell-path method url body))
              (response (shell-command-to-string command)))
         (global-interactive--parse-json nil (json-parse-string response)))
