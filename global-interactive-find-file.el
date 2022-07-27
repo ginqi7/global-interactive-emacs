@@ -41,10 +41,7 @@
     (cond ((string= selected-item "Copy File Directory Path") (kill-new (file-name-directory file-path)))
           ((string= selected-item "Copy File Simple Name") (kill-new (car (last (split-string file-path "/" t " +")))))
           ((string= selected-item "Copy File Full Name") (kill-new file-path))
-          ((string= selected-item "Copy File Content") (with-temp-buffer
-                                                         (insert-file-contents file-path)
-                                                         (mark-whole-buffer)
-                                                         (copy-region-as-kill 1 (buffer-size))))
+          ((string= selected-item "Copy File Content") (kill-new (global-interactive-file-to-string file-path)))
           ((string= selected-item "Open file") (shell-command-to-string (format "open %s" file-path))))))
 
 (defun global-interactive-find-file (&optional file-path)

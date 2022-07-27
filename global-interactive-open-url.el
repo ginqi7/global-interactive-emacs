@@ -5,17 +5,12 @@
 
 (defvar global-interactive-url-yaml-path nil)
 
-(defun file-to-string (file)
-  "File to string function"
-  (with-temp-buffer
-    (insert-file-contents file)
-    (buffer-string)))
 
 (defun global-interactive-open-url-init ()
   (when (and (not global-interactive-url-plist)
              global-interactive-url-yaml-path)
     (require 'yaml)
-    (setq global-interactive-url-plist (yaml-parse-string (file-to-string global-interactive-url-yaml-path)
+    (setq global-interactive-url-plist (yaml-parse-string (global-interactive-file-to-string global-interactive-url-yaml-path)
                                                     :object-type 'plist
                                                     :sequence-type 'array
                                                     :null-object :empty))))
@@ -56,7 +51,7 @@
   (interactive)
   (when global-interactive-url-yaml-path 
     (require 'yaml)
-    (setq global-interactive-url-plist (yaml-parse-string (file-to-string global-interactive-url-yaml-path)
+    (setq global-interactive-url-plist (yaml-parse-string (global-interactive-file-to-string global-interactive-url-yaml-path)
                                                           :object-type 'plist
                                                           :sequence-type 'array
                                                           :null-object :empty))))

@@ -9,7 +9,7 @@
   (when (and (not global-interactive-web-search-plist)
              global-interactive-url-yaml-path)
     (require 'yaml)
-    (setq global-interactive-web-search-plist (yaml-parse-string (file-to-string global-interactive-web-search-yaml-path)
+    (setq global-interactive-web-search-plist (yaml-parse-string (global-interactive-file-to-string global-interactive-web-search-yaml-path)
                                                     :object-type 'plist
                                                     :sequence-type 'array
                                                     :null-object :empty))))
@@ -53,7 +53,7 @@
   (interactive)
   (when global-interactive-web-search-yaml-path 
     (require 'yaml)
-    (setq global-interactive-web-search-plist (yaml-parse-string (file-to-string global-interactive-web-search-yaml-path)
+    (setq global-interactive-web-search-plist (yaml-parse-string (global-interactive-file-to-string global-interactive-web-search-yaml-path)
                                                           :object-type 'plist
                                                           :sequence-type 'array
                                                           :null-object :empty))))

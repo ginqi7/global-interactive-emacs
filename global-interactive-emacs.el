@@ -7,6 +7,12 @@
 
 (defvar global-interactive-select-from-the-clipboard "Select from the clipboard 📋")
 
+(defun global-interactive-file-to-string (file)
+  "File to string function"
+  (with-temp-buffer
+    (insert-file-contents file)
+    (buffer-string)))
+
 (defun global-interactive-select-from-clipboard (selected-item &optional copy)
   (setq selected-item (if (string= selected-item global-interactive-select-from-the-clipboard)
                           (progn 
