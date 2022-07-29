@@ -61,6 +61,9 @@ I split different functions into different files, you can choose by your needs.
   (require 'global-interactive-youdao-dictionary)
   (require 'global-interactive-web-search)
   (require 'global-interactive-send-request)
+  (require 'global-interactive-find-file)
+  (require 'global-interactive-chrome-bookmarks)
+  (require 'global-interactive-chrome-history)
 #+end_src
 
 ** global-interactive-run-app
@@ -149,6 +152,9 @@ I use [[https://github.com/kasper/phoenix][phoenix]] to bind the command to "cmd
 + *global-interactive-youdao-dictionary*: transalte word by youdao dictionary.
 + *global-interactive-web-search*: using browser to query info by pre-define search engine.
 + *global-interactive-send-request*: send http request with chrome cookie, and parse it's json response.
++ *global-interactive-find-file*: find a file in system and do some action on this file.
++ *global-interactive-chrome-bookmarks*: query chrome bookmarks.
++ *global-interactive-chrome-history*: query chrome history.
 * Example
 ** global-interactive-select-from-clipboard
 
@@ -200,5 +206,14 @@ Define some search engine, and input some text to query.
 + it could parse json response, and interactively preview the response body.
 + every time interactively select a json part, it will copy the json.
 
-  
+** global-interactive-find-file
+#+HTML: <p align="center"><img width="600px" src="./example/global-interactive-find-file.gif"></p>
++ the base path default is '~/'
++ you can interactively select a file.
++ when you select a file, you can run a action on this file.
++ you can copy file name, path or content. 
+** global-interactive-chrome-bookmarks  
+#+HTML: <p align="center"><img width="600px" src="./example/global-interactive-chrome-bookmarks.gif"></p>
+** global-interactive-chrome-history 
+#+HTML: <p align="center"><img width="600px" src="./example/global-interactive-chrome-history.gif"></p>
 
