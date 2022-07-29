@@ -3,13 +3,6 @@
 
 (setq global-interactive-app-command nil)
 
-
-
-(defun remove-unuseful (str)
-  "Remove some unuseful char in STR"
-  (replace-regexp-in-string "[\015>=*]" "" (ansi-color-apply string)))
-
-
 (defun global-interactive-app-command--find-all-app ()
   (let* ((output (split-string (shell-command-to-string "ls -1 /Applications") "\n" t " +")))
     (setq global-interactive-app-command 
@@ -28,8 +21,7 @@
         (when command
           (shell-command (format "open -a \"%s\"" (car command)))))    
     (progn  (completing-read "Warnning" '("candidates is null,Maybe there is looking for the app in the computer")) 
-            (global-interactive-run-app-init))
-    ))
+            (global-interactive-run-app-init))))
 
 
 (defun global-interactive-run-app-init()

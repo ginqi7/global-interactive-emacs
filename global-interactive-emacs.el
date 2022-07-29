@@ -7,6 +7,15 @@
 
 (defvar global-interactive-select-from-the-clipboard "Select from the clipboard 📋")
 
+
+(defun global-interactive-remove-unuseful (str)
+  "Remove some unuseful char in STR"
+  (replace-regexp-in-string "[\015>=*]" "" (ansi-color-apply string)))
+
+(defun global-interactive-output-filter (proc string)
+  (when (buffer-live-p (process-buffer proc))
+    (process-put proc 'output (concat (process-get proc 'output) (global-interactive-remove-unuseful string)))))
+
 (defun global-interactive-file-to-string (file)
   "File to string function"
   (with-temp-buffer
