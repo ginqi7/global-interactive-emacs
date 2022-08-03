@@ -121,13 +121,16 @@ IGNORED is &rest."
      nil t "*global-interactive-choose error*" nil)
     (string-trim (buffer-string))))
 
-(defun global-interactive-emacs ()
-  "Global run Emacs intearactive function."
+(defun global-interactive-emacs (&optional out-emacs)
+  "Global run Emacs intearactive function.
+OUT-EMACS is t run this function out of Emacs.
+          is nil run this function in Emacs."
   (interactive)
-  (setq completing-read-function #'global-interactive-choose)
+  (when out-emacs
+    (setq completing-read-function #'global-interactive-choose))
   (let*
       ((candidates (mapcar #'car global-interactive-default-command))
-       (selected-item (global-interactive-read "" candidates))
+       (selected-item (global-interactive-read "Select your Global Action: " candidates))
        (command
         (seq-filter
          (lambda (command) (string= selected-item (car command)))

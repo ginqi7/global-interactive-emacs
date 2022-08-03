@@ -134,7 +134,7 @@ SIGNAL is process accept signal."
   (global-interactive-parse-chrome-history-output))
 
 (run-at-time t 30 #'global-interactive-update-chrome-history)
-(global-interactive-update-chrome-history)
+
 
 (provide 'global-interactive-chrome-history)
 

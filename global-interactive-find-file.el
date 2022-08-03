@@ -72,7 +72,7 @@ BASE-PATH is last ls' path."
                        file-type)))
                (format "%s  %s " file-name file-type)))
            candidates))
-         (seletcted-item (global-interactive-read "" candidates))
+         (seletcted-item (global-interactive-read "Please Select a file: " candidates))
          (file-name (car (split-string seletcted-item "(" t " +")))
          (file-path (format "%s/%s" base-path file-name)))
     (if (cl-search "(Directory)" seletcted-item)
@@ -82,7 +82,7 @@ BASE-PATH is last ls' path."
 (defun global-interactive-do-action-on-file (file-path)
   "Do some action in file named 'FILE-PATH'."
   (let ((selected-item
-         (completing-read ""
+         (completing-read "Please Select an action for file: "
                           '("Copy File Simple Name"
                             "Copy File Full Name"
                             "Copy File Path"

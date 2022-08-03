@@ -60,7 +60,7 @@
   (interactive)
   (if global-interactive-app-command
       (let* ((candidates global-interactive-app-command)
-             (selected-item (completing-read "" candidates))
+             (selected-item (completing-read "Please Select an app: " candidates))
              (command
               (seq-filter
                (lambda (command) (string= selected-item command))
