@@ -36,6 +36,7 @@ elif method.lower() == 'post':
 else:
     raise Exception("Sorry, not support the method") 
 contentType = response.headers['content-type']
+response.encoding = response.apparent_encoding
 if  "text/html" in contentType :
     print(response.text)
 elif  "application/json" in contentType :
