@@ -2,17 +2,17 @@
 #+author: Qiqi Jin
 #+language: en
 
-This tool is inspired by article : [[https://isamert.net/2022/03/16/global-interactive-emacs-functions.html][Global interactive Emacs functions]].It provides an idea to run Emacs functions outside of Emacs.
+This tool is inspired by article : [[https://isamert.net/2022/03/16/global-interactive-emacs-functions.html][Global interactive Emacs functions]]. It provides an idea to run Emacs functions outside of Emacs.
 
-So I try to use this idea to wrtie a tool like [[https://www.obdev.at/products/launchbar/index.html][lauchbar]] or [[https://www.alfredapp.com/][Alfred]] . It can help user to quickly lauch app or run work flow.  
+So I try to use this idea to wrtie a tool like [[https://www.obdev.at/products/launchbar/index.html][lauchbar]] or [[https://www.alfredapp.com/][Alfred]]. It can help user to quickly lauch app or run work flow.  
 
 I'm using it to replace the lauchbar.
 
 * Pros and cons
 
-This toole has some pros and cons, and I think if you have the following needs, you can try to use it :
+This tool has some pros and cons, and I think if you have the following needs, you can try to use it :
 
-+ you don't want pay for other tools like [[https://www.obdev.at/products/launchbar/index.html][lauchbar]] or [[https://www.alfredapp.com/][Alfred]] .
++ you don't want to pay for other tools like [[https://www.obdev.at/products/launchbar/index.html][lauchbar]] or [[https://www.alfredapp.com/][Alfred]].
 + you wish some function in Emacs could run out of Emacs.
 + You're familiar with Emacs, there are some plugins, and custom functions that you want to reuse.
 + You don't want to learn a new language or workflow of a new software
@@ -25,7 +25,7 @@ This toole has some pros and cons, and I think if you have the following needs, 
 + *Scalability*: You can write your own interactive functions and plug them into the tool, or use the Emacs plugins developed by others to extract the interaction functions and plug them into the tool.
 
 ** Cons
-+ *Not powerful for now*: Obviously, the tool is not as powerful as lauchbar or Alfred. At the moment it is only useful for my own needs. I will continue to improve according to my needs, and anyone is welcome to help improve it.
++ *Not powerful for now*: Obviously, the tool is not as powerful as lauchbar or Alfred. At the moment, it is only useful for my own needs. I will continue to improve according to my needs, and anyone is welcome to help improve it.
 + *Can't perfectly support all Emacs interactive functions*: There are currently some Emacs interaction functions that cannot be run outside of Emacs, such as =execute-extended-command=. I don't have the train of thought to support it yet.
 
 * Prerequisites
@@ -35,7 +35,7 @@ This toole has some pros and cons, and I think if you have the following needs, 
 
 =Global Interactive Emacs= use it as interface to interactively communicate with Emacs.
 
-Maybe using rofi is okay in Linux, but I only have Mac OS and can't test it.
+Maybe using rofi is okay on Linux, but I only have Mac OS and can't test it.
 
 * Installing
 
@@ -67,13 +67,13 @@ I split different functions into different files, you can choose by your needs.
 #+end_src
 
 ** global-interactive-run-app
-You could run 'global-interactive-run-app-init' in your init file, it will find your apps in your '/Applications' directory. If you don't run it manual, it will be called in your first choose lauch some apps.
+You could run 'global-interactive-run-app-init' in your init file, it will find your apps in your '/Applications' directory. If you don't run it manual, it will be called in your first choose launch some apps.
 #+begin_src emacs-lisp
 (global-interactive-run-app-init)
 #+end_src
 
 ** global-interactive-open-url
-You could define some urls to quickly jump to selected url. the configuration is using yaml file or emacs plist.
+You could define some urls to quickly jump to selected url. The configuration is using yaml file or emacs plist.
 
 If you use emacs plist to define urls: 
 #+begin_src emacs-lisp
@@ -86,7 +86,7 @@ If you use emacs plist to define urls:
 
 If you use yaml to define urls:
 + you need add package: [[https://github.com/zkry/yaml.el][yaml]]
-+ you need save yaml config to a file. it values like:
++ you need save yaml config to a file. It's values like:
 #+begin_src yaml
   movie:
   - Doctor Strange in the Multiverse of Madness: https://www.imdb.com/title/tt9419884/?ref_=hm_fanfav_tt_t_1_pd_fp1
@@ -102,7 +102,7 @@ music:
 
 ** global-interactive-web-search
 Define some search engine, and input some text to query.
-You could define some urls to quickly jump to selected url. the configuration is using yaml file or emacs plist.
+You could define some urls to quickly jump to selected url. The configuration is using yaml file or emacs plist.
 
 If you use emacs plist to define urls: 
 #+begin_src emacs-lisp
@@ -113,19 +113,19 @@ using ${param} as placeholder, it will replace you input text.
 
 If you use yaml to define urls:
 + you need add package: [[https://github.com/zkry/yaml.el][yaml]]
-+ you need save yaml config to a file. it values like:
++ you need save yaml config to a file. It's values like:
 #+begin_src yaml
 Google: https://www.google.com/search?q=${param}
 Zhihu: https://www.zhihu.com/search?type=content&q=${param}
 #+end_src
 + you need config parameter 'global-interactive-web-search-yaml-path'
 
-  #+begin_src emacs-lisp
-    (setq global-interactive-web-search-yaml-path "some path to yaml file")
-  #+end_src
+#+begin_src emacs-lisp
+(setq global-interactive-web-search-yaml-path "some path to yaml file")
+#+end_src
 
 ** global-interactive-send-request
-send_request need a python package [[https://github.com/n8henrie/pycookiecheat][pycookiecheat]] . It could get chrome cookies. so I write a python script =send_request.py=, it can get chrome cookie and send request to a website.
+send_request need a python package [[https://github.com/n8henrie/pycookiecheat][pycookiecheat]]. It could get chrome cookies. so I write a python script =send_request.py=, it can get chrome cookie and send request to a website.
 
 #+begin_src emacs-lisp
 (setq global-interactive-python-shell-path "some_path/send_request.py")
@@ -133,9 +133,17 @@ send_request need a python package [[https://github.com/n8henrie/pycookiecheat][
 
 * Usage
 
-After you install and configurate this tool. you need start emacs server, and run:
+After you install and configurate this tool. You need start emacs server, and run:
+
+There are three method to run 'global-interactive-emacs':
+1. Run 'global-interactive-emacs' in current Emacs frame. Just run '(global-interactive-emacs)'
+2. Run 'global-interactive-emacs' out of Emacs. You could run shell like :
 #+begin_src shell
-  emacsclient --eval "(global-interactive-emacs)"
+  emacsclient --eval "(global-interactive-emacs t)"
+#+end_src
+3. Run 'global-interactive-emacs' in a new Emacs frame like out of Emacs. you coud run shell like:
+#+begin_src emacs-lisp
+  emacsclient --eval "(global-interactive-frame)"
 #+end_src
 
 If successfully run, you could use some tool to bind the command in a hotkey.
