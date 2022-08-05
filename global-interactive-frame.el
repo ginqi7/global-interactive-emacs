@@ -67,11 +67,19 @@
       (when (and
              (string= (car parameter) "name")
              (string= (cdr parameter) "global-interactive-frame"))
-        (delete-frame frame t)))))
+        (delete-frame frame t)
+        (lower-frame (selected-frame))))))
+
+(run-with-idle-timer 30 t #'global-interactive-frame-cleanup)
+
+;; when you want focus Emacs, delete the transparent frame.
+(defun global-interactive-focus-frame ()
+  "Focus a Emacs frame."
+  (global-interactive-frame-cleanup)
+  (select-frame-set-input-focus (car (frame-list))))
 
 
 (advice-add 'keyboard-quit :before #'global-interactive-frame-cleanup)
 (provide 'global-interactive-frame)
 
 ;;; global-interactive-frame.el ends here
-
