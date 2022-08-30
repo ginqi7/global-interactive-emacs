@@ -48,6 +48,12 @@
 
 (defvar global-interactive-select-from-the-clipboard "Select from the clipboard 📋")
 
+(defvar global-interactive-log-open nil)
+
+
+(defun global-interactive-log (obj)
+  (when global-interactive-log-open
+    (print obj)))
 
 (defun global-interactive-remove-unuseful (str)
   "Remove some unuseful char in STR."

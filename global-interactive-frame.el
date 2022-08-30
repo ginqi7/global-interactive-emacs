@@ -56,8 +56,7 @@
             (delete-before)
             (auto-raise . t)))))
     (select-frame-set-input-focus frame)
-    (global-interactive-emacs)
-    ))
+    (global-interactive-emacs)))
 
 (defun global-interactive-frame-cleanup ()
   "Remove frames."
@@ -76,7 +75,10 @@
 (defun global-interactive-focus-frame ()
   "Focus a Emacs frame."
   (global-interactive-frame-cleanup)
-  (select-frame-set-input-focus (car (frame-list))))
+  (let ((frame (car (frame-list))))
+    (while (frame-parent frame)
+      (setq frame (frame-parent frame)))
+    (select-frame-set-input-focus frame)))
 
 
 (advice-add 'keyboard-quit :before #'global-interactive-frame-cleanup)
