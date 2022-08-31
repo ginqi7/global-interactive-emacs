@@ -30,7 +30,7 @@
              (list "Chrome Tabs" #'global-interactive-chrome-tab))
 
 
-(defvar global-interactive-chrome-tab-scpt-path "./list-chrome-tab.scpt")
+(defvar global-interactive-chrome-tab-scpt-path (expand-file-name "list-chrome-tab.scpt" (file-name-directory load-file-name)))
 
 (defun global-interactive-chrome-tab()
   (interactive)
@@ -73,4 +73,3 @@ SIGNAL is current signal."
 
 (provide 'global-interactive-chrome-tab)
 ;;; global-interactive-chrome-tab.el ends here
-

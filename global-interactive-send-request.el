@@ -41,7 +41,7 @@
 (add-to-list 'global-interactive-default-command
              (list "Send Request" #'global-interactive-send-request))
 
-(defvar global-interactive-python-shell-path nil)
+(defvar global-interactive-python-shell-path (expand-file-name "send_request.py" (file-name-directory load-file-name)))
 
 (defun global-interactive--json-to-preview(json)
   "Simplify preview JSON if is too long."
