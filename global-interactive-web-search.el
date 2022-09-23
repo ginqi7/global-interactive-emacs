@@ -90,12 +90,11 @@ URL-EXPR is yaml object."
   (global-interactive-web-search-init)
   (cond
    ((stringp url-expr)
-    (shell-command
-     (format "open \"%s\""
-             (string-replace "${param}"
-                             (completing-read "Input your search keyword: "
-                                              '("Input your search keyword: "))
-                             url-expr))))
+    (browse-url
+     (string-replace "${param}"
+                     (completing-read "Input your search keyword: "
+                                      '("Input your search keyword: "))
+                     url-expr)))
    ((vectorp url-expr)
     (let* ((keys (mapcar #'car url-expr))
            (selected-item
