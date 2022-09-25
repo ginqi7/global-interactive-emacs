@@ -74,7 +74,7 @@ URL-EXPR is a yaml object."
   (global-interactive-open-url-init)
   (cond
    ((stringp url-expr)
-    (browser-url url-expr))
+    (browse-url url-expr))
    ((vectorp url-expr)
     (let* ((keys (mapcar #'car url-expr))
            (selected-item
