@@ -20,7 +20,7 @@
 
 ;;; Commentary:
 
-;; 
+;;
 
 ;;; Commands:
 ;;
@@ -56,11 +56,15 @@
             (delete-before)
             (auto-raise . t)))))
     (select-frame-set-input-focus frame)
+    (vertico-buffer-mode -1)
+    (vertico-posframe-mode)
     (global-interactive-emacs)))
 
 (defun global-interactive-frame-cleanup ()
   "Remove frames."
   (interactive)
+  (vertico-buffer-mode)
+  (vertico-posframe-mode -1)
   (dolist (frame (frame-list))
     (dolist (parameter (frame-parameters frame))
       (when (and
