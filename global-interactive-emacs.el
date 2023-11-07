@@ -20,7 +20,7 @@
 
 ;;; Commentary:
 
-;; 
+;;
 
 ;;; Commands:
 ;;
@@ -44,7 +44,7 @@
 
 (defvar global-interactive-extensions-init nil)
 
-(defvar global-interactive-back-to-upper-level "Back to the upper level	↑")
+(defvar global-interactive-back-to-upper-level "Back to the upper level ↑")
 
 (defvar global-interactive-select-from-the-clipboard "Select from the clipboard 📋")
 
