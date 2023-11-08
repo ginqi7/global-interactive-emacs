@@ -25,8 +25,7 @@
 ;;; Code:
 (require 'yaml)
 (require 'global-interactive-emacs)
-(add-to-list 'global-interactive-default-command
-             (list "Open Url" #'global-interactive-open-url))
+
 
 (defvar global-interactive-url-plist nil)
 
@@ -59,8 +58,7 @@
 (defun global-interactive-open-url--update-candidates ()
   "Update url candidates."
   (puthash 'url global-interactive-url-hashtable global-interactive-emacs--actions-table)
-  (puthash 'url 'browse-url global-interactive-emacs--actions-func)
-  )
+  (puthash 'url 'browse-url global-interactive-emacs--actions-func))
 
 
 (advice-add 'global-interactive-emacs--update-candidates :before #'global-interactive-open-url--update-candidates)

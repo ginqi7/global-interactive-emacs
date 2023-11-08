@@ -44,7 +44,7 @@
 (defvar global-interactive-snippe-hashtable nil)
 
 
-(defun global-interactive-open-snippe-init ()
+(defun global-interactive-snippe-init ()
   "Load pre-defined snippe yaml file and parse it to 'global-interactive-snippe-plist'."
   (when (and
          (not global-interactive-snippe-hashtable)
@@ -56,7 +56,7 @@
            :null-object :empty))))
 
 
-(defun global-interactive-open-snippe-update ()
+(defun global-interactive-snippe-update ()
   "Update 'global-interactive-snippe-plist'."
   (interactive)
   (when global-interactive-snippe-yaml-path
@@ -67,13 +67,13 @@
            :null-object :empty))))
 
 
-(defun global-interactive-open-snippe--update-candidates ()
+(defun global-interactive-snippe--update-candidates ()
   "Update snippe candidates."
   (puthash 'snippe global-interactive-snippe-hashtable global-interactive-emacs--actions-table)
   (puthash 'snippe 'kill-new global-interactive-emacs--actions-func))
 
 
-(advice-add 'global-interactive-emacs--update-candidates :before #'global-interactive-open-snippe--update-candidates)
+(advice-add 'global-interactive-emacs--update-candidates :before #'global-interactive-snippe--update-candidates)
 
 (provide 'global-interactive-snippe)
 ;;; global-interactive-snippe.el ends here

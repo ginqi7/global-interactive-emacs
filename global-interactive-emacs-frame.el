@@ -39,149 +39,6 @@
 
 ;;; Code:
 
-(require 'orderless)
-(defvar global-interactive-emacs--candidates nil "Candidates.")
-(defvar global-interactive-emacs--candidates-timer nil "Candidates update Timer.")
-(defvar global-interactive-emacs--last-input "" "Last input.")
-(defvar global-interactive-emacs--input-link nil "Input link.")
-(defvar global-interactive-emacs--selected-index 0 "Selected index.")
-(defvar global-interactive-emacs--selected-overlay nil "Selected overlay.")
-(defvar global-interactive-emacs--buffers
-  (make-hash-table :test 'equal)
-  "Buffers.")
-(defvar global-interactive-emacs--frames
-  (make-hash-table :test 'equal)
-  "Frames.")
-
-(defvar global-interactive-emacs--actions-table
-  (make-hash-table :test 'equal)
-  "Actions table.")
-
-(defvar global-interactive-emacs--actions-func
-  (make-hash-table :test 'equal)
-  "Action func.")
-
-(defvar global-interactive-emacs--cur-action-func nil
-  "Current action func.")
-
-(defun global-interactive-emacs--input-update-p ()
-  "Update."
-  (not (string=
-        (global-interactive-emacs--get-input)
-        global-interactive-emacs--last-input)))
-
-
-(defun global-interactive-emacs-update ()
-  "Update."
-  (when (global-interactive-emacs--input-update-p)
-    (setq global-interactive-emacs--last-input
-          (global-interactive-emacs--get-input))
-    (global-interactive-emacs--update-candidates)
-    (global-interactive-emacs--update-candidates-buffer)
-    (global-interactive-emacs--update-candidates-frame)))
-
-(defun global-interactive-emacs-reset-input ()
-  "Reset intput."
-  (interactive)
-  (let ((input-buffer
-         (gethash 'input global-interactive-emacs--buffers)))
-    (when input-buffer
-      (with-current-buffer input-buffer (erase-buffer)))))
-
-
-(defun global-interactive-emacs--create-candidate (name comment func)
-  "Create candidate for NAME COMMENT FUNC."
-  (let ((candidate (make-hash-table :test 'equal)))
-    (puthash 'name name candidate)
-    (puthash 'comment comment candidate)
-    (puthash 'func func candidate)
-    candidate))
-
-(defun global-interactive-emacs--update-candidates ()
-  "Update candidates."
-  (setq global-interactive-emacs--candidates nil)
-  (let* ((input (global-interactive-emacs--get-input))
-         (input (if input input ""))
-         (input-link
-          (append global-interactive-emacs--input-link
-                  (split-string input "\\.")))
-         (url-hashtable global-interactive-emacs--actions-table)
-         (candidates
-          (orderless-filter
-           (car input-link)
-           (hash-table-keys url-hashtable))))
-    (when candidates
-      (setq global-interactive-emacs--cur-action-func
-            (gethash (intern (car candidates)) global-interactive-emacs--actions-func)))
-    (dotimes (i (1- (length input-link)))
-      (when candidates
-        (setq url-hashtable
-              (gethash (intern (car candidates)) url-hashtable))
-        (setq candidates
-              (orderless-filter
-               (nth (1+ i) input-link)
-               (hash-table-keys url-hashtable)))))
-    (dolist (name candidates)
-      (setq global-interactive-emacs--candidates
-            (append global-interactive-emacs--candidates
-                    (list
-                     (global-interactive-emacs--create-candidate
-                      name
-                      (symbol-name(type-of
-                                   (gethash
-                                    (intern (car candidates))
-                                    url-hashtable)))
-                      `(lambda ()
-                         (interactive)
-                         (print
-                          (funcall
-                           ',global-interactive-emacs--cur-action-func
-                           ,(gethash
-                             (intern (car candidates))
-                             url-hashtable)))))))))))
-
-(defun global-interactive-emacs--reset-candidates-timer ()
-  "Reset candidates timer."
-  (when global-interactive-emacs--candidates-timer
-    (cancel-timer global-interactive-emacs--candidates-timer))
-  (setq global-interactive-emacs--candidates-timer
-        (run-at-time t 1 'global-interactive-emacs-update)))
-
-(defun global-interactive-emacs--get-input ()
-  "Update candidates."
-  (let ((input-buffer
-         (gethash 'input global-interactive-emacs--buffers)))
-    (when input-buffer
-      (with-current-buffer input-buffer
-        (buffer-substring-no-properties (point-min) (point-max))))))
-
-
-(defun global-interactive-emacs--mark-selected-candidate ()
-  "Mark selected candidate."
-  (if global-interactive-emacs--selected-overlay
-      (delete-overlay global-interactive-emacs--selected-overlay))
-  (goto-char (point-min))
-  (forward-line global-interactive-emacs--selected-index)
-  (setq global-interactive-emacs--selected-overlay
-        (make-overlay (line-beginning-position) (line-end-position)))
-  (overlay-put
-   global-interactive-emacs--selected-overlay
-   'face calendar-holiday-marker))
-
-(defun global-interactive-emacs--update-candidates-buffer ()
-  "Refresh candidates buffer."
-  (let ((candidates-buffer
-         (gethash 'candidates global-interactive-emacs--buffers)))
-    (when candidates-buffer
-      (with-current-buffer candidates-buffer
-        (erase-buffer)
-        (dolist (candidate global-interactive-emacs--candidates)
-          (insert (gethash 'name candidate))
-          (insert "   ")
-          (insert (gethash 'comment candidate))
-          (insert "\n"))
-        (global-interactive-emacs--mark-selected-candidate)))))
-
 (defun global-interactive-emacs--update-candidates-frame ()
   "Refresh candidates frame."
   (let* ((input-frame
@@ -195,7 +52,7 @@
       (select-frame-set-input-focus input-frame)
       (set-frame-position candidates-frame
                           (car input-frame-position)
-                          (+ (cdr input-frame-position) 30))
+                          (+ 3 (cdr input-frame-position) (frame-char-height input-frame)))
       (set-frame-height candidates-frame
                         (length global-interactive-emacs--candidates)))))
 
@@ -217,8 +74,7 @@
   (global-interactive-emacs--frame-new 'input)
   (global-interactive-emacs--frame-new 'candidates)
   (global-interactive-emacs--frame-new 'preview)
-  (global-interactive-emacs--frame-new 'actions)
-  )
+  (global-interactive-emacs--frame-new 'actions))
 
 (defun global-interactive-emacs--frame-new (name)
   "Create a frame by NAME."
@@ -227,6 +83,7 @@
            (make-frame
             `((name .
                     ,(format "global-interactive-emacs-frame-%s" name))
+                                        ;              (font . "DejaVu Sans Mono-12")
               (no-accept-focus . nil)
               (no-focus-on-map . nil)
               (min-width . 0)
@@ -254,81 +111,13 @@
               (no-special-glyphs . t)
               (desktop-dont-save . t)
               (mode-line-format . nil)))))
+      (set-frame-font (font-spec :family "Roboto Mono" :size 25) nil (list frame))
       (switch-to-buffer
        (gethash name global-interactive-emacs--buffers))
       (global-interactive-emacs-input-mode)
       (erase-buffer)
       (puthash name frame global-interactive-emacs--frames)
       frame)))
-
-(defun global-interactive-emacs-frame ()
-  "Global Interactive Emacs Frame."
-  (interactive)
-  (global-interactive-emacs-frame-init)
-  (let ((input-frame
-         (gethash 'input global-interactive-emacs--frames)))
-    (make-frame-visible input-frame)
-    (global-interactive-emacs--reset-candidates-timer)
-    ))
-
-(defun global-interactive-emacs-quit ()
-  "Delete all global interactive Emacs frames."
-  (interactive)
-  (dolist (frame (hash-table-values global-interactive-emacs--frames))
-    (delete-frame frame))
-  (dolist (buffer (hash-table-values global-interactive-emacs--buffers))
-    (kill-buffer buffer))
-
-  (clrhash global-interactive-emacs--frames)
-  (clrhash global-interactive-emacs--buffers))
-
-
-(defun global-interactive-emacs-select-next ()
-  "Select next candidate."
-  (interactive)
-  (setq global-interactive-emacs--selected-index
-        (1+ global-interactive-emacs--selected-index))
-  (unless (length>
-           global-interactive-emacs--candidates
-           global-interactive-emacs--selected-index)
-    (setq global-interactive-emacs--selected-index 0))
-  (global-interactive-emacs--update-candidates-buffer))
-
-(defun global-interactive-emacs-select-previous ()
-  "Select previous candidate."
-  (interactive)
-  (setq global-interactive-emacs--selected-index
-        (1- global-interactive-emacs--selected-index))
-  (unless (> global-interactive-emacs--selected-index 0)
-    (setq global-interactive-emacs--selected-index
-          (1- (length global-interactive-emacs--candidates))))
-  (global-interactive-emacs--update-candidates-buffer))
-
-(defun global-interactive-emacs-run-selected-candidate ()
-  "Run selected candidate."
-  (interactive)
-  (let ((selected-candidate
-         (nth global-interactive-emacs--selected-index
-              global-interactive-emacs--candidates)))
-    (funcall (gethash 'func selected-candidate))
-    (global-interactive-emacs-quit)
-    ))
-
-
-(define-minor-mode global-interactive-emacs-input-mode
-  "Global interactive Emacs Input mode."
-  :keymap (let
-              ((map (make-sparse-keymap)))
-            (define-key map (kbd "RET") #'global-interactive-emacs-run-selected-candidate)
-            (define-key map (kbd "C-g") #'global-interactive-emacs-quit)
-            (define-key map
-                        (kbd "C-p")
-                        #'global-interactive-emacs-select-previous)
-            (define-key map
-                        (kbd "C-n")
-                        #'global-interactive-emacs-select-next)
-            map))
-
 
 (provide 'global-interactive-emacs-frame)
 ;;; global-interactive-emacs-frame.el ends here

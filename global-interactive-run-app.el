@@ -20,7 +20,7 @@
 
 ;;; Commentary:
 
-;; 
+;;
 
 ;;; Commands:
 ;;
@@ -38,46 +38,34 @@
 
 
 (require 'global-interactive-emacs)
-(add-to-list 'global-interactive-default-command
-             (list "Run App" #'global-interactive-run-app))
 
-(defvar global-interactive-app-command nil)
-
-(defun global-interactive-app-command--find-all-app ()
+(defun global-interactive-run-app--find-all-app ()
   "Find all apps in system."
-  (let* ((output
-          (split-string
-           (shell-command-to-string "ls -1 /Applications")
-           "\n" t " +")))
-    (setq global-interactive-app-command
-          (mapcar
-           (lambda (path) (string-remove-suffix ".app" path))
-           output))))
+  (split-string
+   (shell-command-to-string "ls -1 /Applications")
+   "\n" t " +"))
 
 
-(defun global-interactive-run-app ()
-  "Interactively select app and open it."
-  (interactive)
-  (if global-interactive-app-command
-      (let* ((candidates global-interactive-app-command)
-             (selected-item (completing-read "Please Select an app: " candidates))
-             (command
-              (seq-filter
-               (lambda (command) (string= selected-item command))
-               global-interactive-app-command)))
-        (when command
-          (shell-command (format "open -a \"%s\"" (car command)))))
-    (progn
-      (completing-read "Warnning"
-                       '("candidates is null,Maybe there is looking for the app in the computer"))
-      (global-interactive-run-app-init))))
+(defun global-interactive-run-app (app)
+  "Open a APP."
+  (print app)
+  (shell-command (format "open -a \"%s\"" app)))
 
+(defun global-interactive-app-hashtable ()
+  "Build hash table."
+  (let ((hashmap (make-hash-table :test 'equal)))
+    (dolist (app (global-interactive-run-app--find-all-app))
+      (let ((key (intern app))
+            (value app))
+        (puthash key value hashmap)))
+    hashmap))
 
-(defun global-interactive-run-app-init()
-  "Init list all apps in system."
-  (when (not global-interactive-app-command)
-    (global-interactive-app-command--find-all-app)))
+(defun global-interactive-run-app--update-candidates ()
+  "Update url candidates."
+  (puthash 'app (global-interactive-app-hashtable) global-interactive-emacs--actions-table)
+  (puthash 'app 'global-interactive-run-app global-interactive-emacs--actions-func))
 
+(advice-add 'global-interactive-emacs--update-candidates :before #'global-interactive-run-app--update-candidates)
 
 (provide 'global-interactive-run-app)
 ;;; global-interactive-run-app.el ends here
