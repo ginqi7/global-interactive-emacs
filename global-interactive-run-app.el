@@ -39,22 +39,20 @@
 
 (require 'global-interactive-emacs)
 
-(defun global-interactive-run-app--find-all-app ()
+(defun global-interactive-run-app--find-all-apps ()
   "Find all apps in system."
   (split-string
    (shell-command-to-string "ls -1 /Applications")
    "\n" t " +"))
 
-
 (defun global-interactive-run-app (app)
   "Open a APP."
-  (print app)
   (shell-command (format "open -a \"%s\"" app)))
 
-(defun global-interactive-app-hashtable ()
+(defun global-interactive-run-apps-hashtable ()
   "Build hash table."
   (let ((hashmap (make-hash-table :test 'equal)))
-    (dolist (app (global-interactive-run-app--find-all-app))
+    (dolist (app (global-interactive-run-app--find-all-apps))
       (let ((key (intern app))
             (value app))
         (puthash key value hashmap)))
@@ -62,8 +60,8 @@
 
 (defun global-interactive-run-app--update-candidates ()
   "Update url candidates."
-  (puthash 'app (global-interactive-app-hashtable) global-interactive-emacs--actions-table)
-  (puthash 'app 'global-interactive-run-app global-interactive-emacs--actions-func))
+  (puthash 'run-app (global-interactive-run-apps-hashtable) global-interactive-emacs--actions-table)
+  (puthash 'run-app 'global-interactive-run-app global-interactive-emacs--actions-func))
 
 (advice-add 'global-interactive-emacs--update-candidates :before #'global-interactive-run-app--update-candidates)
 

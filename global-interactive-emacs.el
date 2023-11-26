@@ -68,7 +68,6 @@
         (global-interactive-emacs--get-input)
         global-interactive-emacs--last-input)))
 
-
 (defun global-interactive-emacs-update ()
   "Update."
   (when (global-interactive-emacs--input-update-p)
@@ -89,12 +88,14 @@
 (defun global-interactive-emacs--insert-input-seperator ()
   "Reset intput."
   (interactive)
+  (global-interactive-emacs--insert-input "."))
+
+(defun global-interactive-emacs--insert-input (str)
+  "Insert STR intput."
   (let ((input-buffer
          (gethash 'input global-interactive-emacs--buffers)))
     (when input-buffer
-      (with-current-buffer input-buffer (insert ".")))))
-
-
+      (with-current-buffer input-buffer (insert str)))))
 
 (defun global-interactive-emacs--create-candidate (name comment func)
   "Create candidate for NAME COMMENT FUNC."
@@ -131,16 +132,13 @@
          (lambda (name)
            (global-interactive-emacs--create-candidate
             name
-            (symbol-name
-             (type-of (gethash (intern (car candidates)) hashtable)))
+            (symbol-name (type-of (gethash (intern name) hashtable)))
             `(lambda ()
                (interactive)
-               (print
-                (funcall
-                 ',global-interactive-emacs--cur-action-func
-                 ,(gethash
-                   (intern (car candidates))
-                   hashtable))))))
+               (funcall
+                ',global-interactive-emacs--cur-action-func
+                ,(gethash (intern name) hashtable))
+               )))
          candidates)))
 
 (defun global-interactive-emacs--update-candidates ()
@@ -183,7 +181,6 @@
     (when input-buffer
       (with-current-buffer input-buffer
         (buffer-substring-no-properties (point-min) (point-max))))))
-
 
 (defun global-interactive-emacs--mark-selected-candidate ()
   "Mark selected candidate."
@@ -233,7 +230,6 @@
              4))
           candidates)))
 
-
 (defun global-interactive-emacs--buffer-new (name)
   "Create buffer by NAME."
   (puthash name
@@ -254,15 +250,27 @@
   (global-interactive-emacs--frame-new 'preview)
   (global-interactive-emacs--frame-new 'actions))
 
-
 (defun global-interactive-emacs ()
   "Global Interactive Emacs."
   (interactive)
+  (when (featurep 'macos-controller) (macc-get-actived-app))
   (global-interactive-emacs-frame-init)
   (let ((input-frame
          (gethash 'input global-interactive-emacs--frames)))
     (make-frame-visible input-frame)
     (global-interactive-emacs--reset-candidates-timer)))
+
+(defun global-interactive-emacs-pointer ()
+  "Global Interactive Emacs in current pointer."
+  (interactive)
+  (global-interactive-emacs)
+  (let ((pointer-position (macc-mouse-position)))
+    (print pointer-position)
+    (set-frame-position
+     (gethash 'input global-interactive-emacs--frames)
+     (truncate (car pointer-position))
+     (truncate (cdr pointer-position)))))
+
 
 (defun global-interactive-emacs-quit ()
   "Delete all global interactive Emacs frames."
@@ -277,7 +285,6 @@
 
   (when global-interactive-emacs--candidates-timer
     (cancel-timer global-interactive-emacs--candidates-timer)))
-
 
 (defun global-interactive-emacs-select-next ()
   "Select next candidate."
@@ -306,9 +313,11 @@
   (let ((selected-candidate
          (nth global-interactive-emacs--selected-index
               global-interactive-emacs--candidates)))
-    (funcall (gethash 'func selected-candidate))
-    (global-interactive-emacs-quit)))
-
+    (if (string= (gethash 'comment selected-candidate) "hash-table")
+        (global-interactive-emacs--insert-input
+         (gethash 'name selected-candidate))
+      (funcall (gethash 'func selected-candidate))
+      (global-interactive-emacs-quit))))
 
 (define-minor-mode global-interactive-emacs-input-mode
   "Global interactive Emacs Input mode."

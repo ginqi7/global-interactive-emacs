@@ -43,7 +43,6 @@
 
 (defvar global-interactive-snippe-hashtable nil)
 
-
 (defun global-interactive-snippe-init ()
   "Load pre-defined snippe yaml file and parse it to 'global-interactive-snippe-plist'."
   (when (and
@@ -55,7 +54,6 @@
            :sequence-type 'list
            :null-object :empty))))
 
-
 (defun global-interactive-snippe-update ()
   "Update 'global-interactive-snippe-plist'."
   (interactive)
@@ -66,12 +64,16 @@
            :sequence-type 'list
            :null-object :empty))))
 
-
 (defun global-interactive-snippe--update-candidates ()
   "Update snippe candidates."
   (puthash 'snippe global-interactive-snippe-hashtable global-interactive-emacs--actions-table)
-  (puthash 'snippe 'kill-new global-interactive-emacs--actions-func))
+  (puthash 'snippe 'global-interactive-snippe--action-func global-interactive-emacs--actions-func))
 
+(defun global-interactive-snippe--action-func (action)
+  "ACTION."
+  (kill-new action)
+  (when (featurep 'macos-controller)
+    (macc-app-switch-to-last-actived-app)))
 
 (advice-add 'global-interactive-emacs--update-candidates :before #'global-interactive-snippe--update-candidates)
 
