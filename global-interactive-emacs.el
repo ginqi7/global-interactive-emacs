@@ -44,6 +44,8 @@
 (defvar global-interactive-emacs--input-link nil "Input link.")
 (defvar global-interactive-emacs--selected-index 0 "Selected index.")
 (defvar global-interactive-emacs--selected-overlay nil "Selected overlay.")
+(defvar global-interactive-emacs--last-app nil "Last front app.")
+
 (defvar global-interactive-emacs--buffers
   (make-hash-table :test 'equal)
   "Buffers.")
@@ -188,6 +190,7 @@
       (delete-overlay global-interactive-emacs--selected-overlay))
   (goto-char (point-min))
   (forward-line global-interactive-emacs--selected-index)
+  ;; (recenter)
   (setq global-interactive-emacs--selected-overlay
         (make-overlay (line-beginning-position) (line-end-position)))
   (overlay-put
@@ -271,6 +274,12 @@
      (truncate (car pointer-position))
      (truncate (cdr pointer-position)))))
 
+(defun global-interactive-emacs-quit-back ()
+  (interactive)
+  (global-interactive-emacs-quit)
+  (when global-interactive-emacs--last-app
+    (do-applescript (format "tell application \"%s\" to activate" global-interactive-emacs--last-app))
+    (setq global-interactive-emacs--last-app nil)))
 
 (defun global-interactive-emacs-quit ()
   "Delete all global interactive Emacs frames."
@@ -326,7 +335,7 @@
             (define-key map
                         (kbd "RET")
                         #'global-interactive-emacs-run-selected-candidate)
-            (define-key map (kbd "C-g") #'global-interactive-emacs-quit)
+            (define-key map (kbd "C-g") #'global-interactive-emacs-quit-back)
             (define-key map
                         (kbd "C-p")
                         #'global-interactive-emacs-select-previous)

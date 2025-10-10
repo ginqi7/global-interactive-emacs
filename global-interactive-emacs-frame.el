@@ -54,7 +54,8 @@
                           (car input-frame-position)
                           (+ 3 (cdr input-frame-position) (frame-char-height input-frame)))
       (set-frame-height candidates-frame
-                        (length global-interactive-emacs--candidates)))))
+                        (min 30 (floor (* 1.5 (length global-interactive-emacs--candidates))))))))
+
 
 (defun global-interactive-emacs--buffer-new (name)
   "Create buffer by NAME."
@@ -111,7 +112,7 @@
               (no-special-glyphs . t)
               (desktop-dont-save . t)
               (mode-line-format . nil)))))
-      (set-frame-font (font-spec :family "Roboto Mono" :size 25) nil (list frame))
+      ;; (set-frame-font (font-spec :family "Roboto Mono" :size 25) nil (list frame))
       (switch-to-buffer
        (gethash name global-interactive-emacs--buffers))
       (global-interactive-emacs-input-mode)
