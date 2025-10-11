@@ -37,6 +37,10 @@
 ;;; Code:
 
 (require 'global-interactive-emacs-frame)
+
+(defcustom global-interactive-emacs-input-separator "."
+  "The separator char.")
+
 (defvar global-interactive-emacs--candidates nil "Candidates.")
 (defvar global-interactive-emacs--candidates-timer nil "Candidates update Timer.")
 (defvar global-interactive-emacs--last-input "" "Last input.")
@@ -86,10 +90,10 @@
     (when input-buffer
       (with-current-buffer input-buffer (erase-buffer)))))
 
-(defun global-interactive-emacs--insert-input-seperator ()
+(defun global-interactive-emacs--insert-input-separator ()
   "Reset intput."
   (interactive)
-  (global-interactive-emacs--insert-input "."))
+  (global-interactive-emacs--insert-input global-interactive-emacs-input-separator))
 
 (defun global-interactive-emacs--insert-input (str)
   "Insert STR intput."
@@ -130,13 +134,13 @@
            (intern (car candidates))
            global-interactive-emacs--actions-func))))
 
-(defun global-interactive-emacs--auto-add-seperator (candidates hashtable)
-  "Auto add seperator for CANDIDATES and HASHTABLE."
+(defun global-interactive-emacs--auto-add-separator (candidates hashtable)
+  "Auto add separator for CANDIDATES and HASHTABLE."
   (when (and
          (= 1 (length candidates))
          (hash-table-p
           (gethash (intern (car candidates)) hashtable)))
-    (global-interactive-emacs--insert-input-seperator)))
+    (global-interactive-emacs--insert-input-separator)))
 
 (defun global-interactive-emacs--update-show-candidates (candidates hashtable)
   "Update show CANDIDATES in HASHTABLE."
@@ -177,7 +181,7 @@
               (global-interactive-emacs--filter
                (nth (1+ i) input-link)
                hashtable))))
-    (global-interactive-emacs--auto-add-seperator candidates hashtable)
+    (global-interactive-emacs--auto-add-separator candidates hashtable)
     (global-interactive-emacs--update-show-candidates candidates hashtable)))
 
 (defun global-interactive-emacs--reset-candidates-timer ()
