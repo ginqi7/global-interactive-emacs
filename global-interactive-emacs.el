@@ -36,7 +36,6 @@
 
 ;;; Code:
 
-(require 'orderless)
 (require 'global-interactive-emacs-frame)
 (defvar global-interactive-emacs--candidates nil "Candidates.")
 (defvar global-interactive-emacs--candidates-timer nil "Candidates update Timer.")
@@ -107,9 +106,21 @@
     (puthash 'func func candidate)
     candidate))
 
+(defun global-interactive-emacs--extract (completions-list)
+  (let ((result '())
+        (current completions-list))
+    (while (and (consp current)
+                (not (integerp (cdr current))))
+      (push (car current) result)
+      (setq current (cdr current)))
+    (when (consp current)
+      (push (car current) result))
+    (nreverse result)))
+
+
 (defun global-interactive-emacs--filter (str table)
   "Filter elements by STR in TABLE."
-  (orderless-filter str (hash-table-keys table)))
+  (global-interactive-emacs--extract (completion-all-completions str (hash-table-keys table) nil nil)))
 
 (defun global-interactive-emacs--add-current-action-func (candidates)
   "Add current action func for CANDIDATES."
@@ -139,8 +150,8 @@
                (interactive)
                (funcall
                 ',global-interactive-emacs--cur-action-func
-                ,(gethash (intern name) hashtable))
-               )))
+                ,(gethash (intern name) hashtable)))))
+         
          candidates)))
 
 (defun global-interactive-emacs--update-candidates ()
@@ -225,13 +236,15 @@
 
 (defun global-interactive-emacs--candidates-max-length (candidates)
   "Get CANDIDATES max length."
-  (apply 'max
-         (mapcar
-          (lambda (element)
-            (+
-             (global-interactive-emacs--candidate-length element)
-             4))
-          candidates)))
+  (if candidates
+      (apply 'max
+             (mapcar
+              (lambda (element)
+                (+
+                 (global-interactive-emacs--candidate-length element)
+                 4))
+              candidates))
+    '(0)))
 
 (defun global-interactive-emacs--buffer-new (name)
   "Create buffer by NAME."
