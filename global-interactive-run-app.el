@@ -39,11 +39,22 @@
 
 (require 'global-interactive-emacs)
 
+(defcustom global-interactive-app-directories
+  '("/Applications/"
+    "/Applications/Utilities"
+    "/System/Applications/"
+    "/System/Applications/Utilities/"
+    "~/Applications/Home\\ Manager\\ Apps/")
+  "The directories contains applications.")
+
 (defun global-interactive-run-app--find-all-apps ()
   "Find all apps in system."
-  (split-string
-   (shell-command-to-string "ls -1 /Applications")
-   "\n" t " +"))
+  (let ((cmd
+         (format "ls %s |  grep '\\.app$' | sed 's/\.app$//g'"
+                 (string-join global-interactive-app-directories " "))))
+    (split-string
+     (shell-command-to-string cmd)
+     "\n" t " +")))
 
 (defun global-interactive-run-app (app)
   "Open a APP."
