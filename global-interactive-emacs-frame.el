@@ -39,6 +39,13 @@
 
 ;;; Code:
 
+(defvar global-interactive-emacs-frame--input-font
+  (font-spec :family
+             (face-attribute 'default :family)
+             :size
+             25)
+  "Input Font.")
+
 (defun global-interactive-emacs--update-candidates-frame ()
   "Refresh candidates frame."
   (let* ((input-frame
@@ -77,6 +84,26 @@
   (global-interactive-emacs--frame-new 'preview)
   (global-interactive-emacs--frame-new 'actions))
 
+(defun global-interactive-emacs-frame--screen-geometry ()
+  (alist-get 'geometry
+             (car (display-monitor-attributes-list))))
+
+(defun global-interactive-emacs-frame--screen-height ()
+  (nth 3 (global-interactive-emacs-frame--screen-geometry)))
+
+(defun global-interactive-emacs-frame--screen-width ()
+  (nth 2 (global-interactive-emacs-frame--screen-geometry)))
+
+(defun global-interactive-emacs-frame--width()
+  (floor (* 0.3 (global-interactive-emacs-frame--screen-width))))
+
+(defun global-interactive-emacs-frame--left ()
+  (floor (* 0.5 (- (global-interactive-emacs-frame--screen-width)
+                   (global-interactive-emacs-frame--width)))))
+
+(defun global-interactive-emacs-frame--top ()
+  (floor (* 0.2 (global-interactive-emacs-frame--screen-height))))
+
 (defun global-interactive-emacs--frame-new (name)
   "Create a frame by NAME."
   (unless (gethash name global-interactive-emacs--frames)
@@ -84,18 +111,19 @@
            (make-frame
             `((name .
                     ,(format "global-interactive-emacs-frame-%s" name))
-                                        ;              (font . "DejaVu Sans Mono-12")
               (no-accept-focus . nil)
               (no-focus-on-map . nil)
               (min-width . 0)
               (min-height . 0)
-              (width . 60)
+              (left . ,(global-interactive-emacs-frame--left))
+              (top . ,(global-interactive-emacs-frame--top))
+              (width . (text-pixels . ,(global-interactive-emacs-frame--width)))
               (height . 0)
               (text-height . 10)
               (native-height . 10)
               (border-width . 0)
               (left-fringe . 10)
-              (right-fringe . 0)
+              (right-fringe . 10)
               (vertical-scroll-bars . nil)
               (horizontal-scroll-bars . nil)
               (menu-bar-lines . 0)
@@ -112,7 +140,7 @@
               (no-special-glyphs . t)
               (desktop-dont-save . t)
               (mode-line-format . nil)))))
-      ;; (set-frame-font (font-spec :family "Roboto Mono" :size 25) nil (list frame))
+      (set-frame-font global-interactive-emacs-frame--input-font nil (list frame))
       (switch-to-buffer
        (gethash name global-interactive-emacs--buffers))
       (global-interactive-emacs-input-mode)
