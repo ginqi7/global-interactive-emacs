@@ -55,13 +55,16 @@
           (gethash 'candidates global-interactive-emacs--frames)))
     (when (and input-frame candidates-frame)
       (setq input-frame-position (frame-position input-frame))
-      (make-frame-visible candidates-frame)
+      
       (select-frame-set-input-focus input-frame)
       (set-frame-position candidates-frame
-                          (car input-frame-position)
-                          (+ 3 (cdr input-frame-position) (frame-char-height input-frame)))
+                          0
+                          (frame-char-height input-frame))
+      (set-frame-parameter candidates-frame 'parent-frame
+                           input-frame)
       (set-frame-height candidates-frame
-                        (min 30 (floor (* 1.5 (length global-interactive-emacs--candidates))))))))
+                        (min 30 (floor (* 1.5 (length global-interactive-emacs--candidates)))))
+      (make-frame-visible candidates-frame))))
 
 
 (defun global-interactive-emacs--buffer-new (name)
