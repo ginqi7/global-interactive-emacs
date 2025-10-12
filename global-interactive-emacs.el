@@ -41,6 +41,21 @@
 (defcustom global-interactive-emacs-input-separator "."
   "The separator char.")
 
+(defclass global-interactive-emacs-candidate ()
+  ((key :initarg :key)
+   (value :initarg :value)
+   (next-table :initarg :next-table)
+   (next-func :initarg :next-func)))
+
+(cl-defmethod gie-candidate-next ((candidate global-interactive-emacs-candidate))
+  (let ((table (eieio-oref candidate 'next-table)))
+    (unless table
+      (setq table (funcall
+                   (eieio-oref candidate 'next-func)
+                   (eieio-oref candidate 'value))))
+    (eieio-oset candidate 'next-table table)
+    table))
+
 (defvar global-interactive-emacs--candidates nil "Candidates.")
 (defvar global-interactive-emacs--candidates-timer nil "Candidates update Timer.")
 (defvar global-interactive-emacs--last-input "" "Last input.")
@@ -56,7 +71,7 @@
   (make-hash-table :test 'equal)
   "Frames.")
 
-(defvar global-interactive-emacs--actions-table
+(defvar global-interactive-emacs--candidates-table
   (make-hash-table :test 'equal)
   "Actions table.")
 
@@ -124,7 +139,9 @@
 
 (defun global-interactive-emacs--filter (str table)
   "Filter elements by STR in TABLE."
-  (global-interactive-emacs--extract (completion-all-completions str (hash-table-keys table) nil nil)))
+  (mapcar (lambda (key) (gethash key table))
+          (global-interactive-emacs--extract
+           (completion-all-completions str (hash-table-keys table) nil nil))))
 
 (defun global-interactive-emacs--add-current-action-func (candidates)
   "Add current action func for CANDIDATES."
@@ -166,23 +183,34 @@
          (input-link
           (append global-interactive-emacs--input-link
                   (split-string input "\\.")))
-         (hashtable global-interactive-emacs--actions-table)
+         (hashtable global-interactive-emacs--candidates-table)
          (candidates
           (global-interactive-emacs--filter
            (car input-link)
            hashtable)))
-    (global-interactive-emacs--add-current-action-func candidates)
     (dotimes (i (1- (length input-link)))
       (when candidates
+        (setq hashtable
+              (gie-candidate-next (car candidates)))
         (when (hash-table-p hashtable)
-          (setq hashtable
-                (gethash (intern (car candidates)) hashtable)))
-        (setq candidates
-              (global-interactive-emacs--filter
-               (nth (1+ i) input-link)
-               hashtable))))
-    (global-interactive-emacs--auto-add-separator candidates hashtable)
-    (global-interactive-emacs--update-show-candidates candidates hashtable)))
+          (setq candidates
+                (global-interactive-emacs--filter
+                 (nth (1+ i) input-link)
+                 hashtable)))))
+    (setq global-interactive-emacs--candidates candidates)))
+;; (global-interactive-emacs--add-current-action-func candidates)
+;; (dotimes (i (1- (length input-link)))
+;;   (when candidates
+;;     (when (hash-table-p hashtable)
+;;       (setq hashtable
+;;             (gethash (intern (car candidates)) hashtable)))
+;;     (setq candidates
+;;           (global-interactive-emacs--filter
+;;            (nth (1+ i) input-link)
+;;            hashtable))))
+;; (global-interactive-emacs--auto-add-separator candidates hashtable)))
+;; (global-interactive-emacs--update-show-candidates candidates hashtable)
+
 
 (defun global-interactive-emacs--reset-candidates-timer ()
   "Reset candidates timer."
@@ -219,16 +247,15 @@
     (when candidates-buffer
       (with-current-buffer candidates-buffer
         (erase-buffer)
-        (let ((max-length
-               (global-interactive-emacs--candidates-max-length global-interactive-emacs--candidates)))
+        (let ()
           (dolist (candidate global-interactive-emacs--candidates)
-            (insert (gethash 'name candidate))
-            (dotimes (_
-                      (- max-length
-                         (global-interactive-emacs--candidate-length candidate)))
-              (insert " "))
+            (insert (eieio-oref candidate 'key))
+            ;; (dotimes (_
+            ;;           (- max-length
+            ;;              (global-interactive-emacs--candidate-length candidate)))
+            ;;   (insert " "))
 
-            (insert (gethash 'comment candidate))
+            ;; (insert (gethash 'comment candidate))
             (insert "\n")))
         (global-interactive-emacs--mark-selected-candidate)))))
 
@@ -336,13 +363,13 @@
 (defun global-interactive-emacs-run-selected-candidate ()
   "Run selected candidate."
   (interactive)
-  (let ((selected-candidate
-         (nth global-interactive-emacs--selected-index
-              global-interactive-emacs--candidates)))
-    (if (string= (gethash 'comment selected-candidate) "hash-table")
+  (let* ((selected-candidate
+          (nth global-interactive-emacs--selected-index
+               global-interactive-emacs--candidates))
+         (table (gie-candidate-next selected-candidate)))
+    (if (hash-table-p table)
         (global-interactive-emacs--insert-input
-         (gethash 'name selected-candidate))
-      (funcall (gethash 'func selected-candidate))
+         (eieio-oref selected-candidate 'key))
       (global-interactive-emacs-quit))))
 
 (define-minor-mode global-interactive-emacs-input-mode

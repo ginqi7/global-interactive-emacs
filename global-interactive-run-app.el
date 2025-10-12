@@ -60,21 +60,30 @@
   "Open a APP."
   (shell-command (format "open -a \"%s\"" app)))
 
-(defun global-interactive-run-apps-hashtable ()
-  "Build hash table."
-  (let ((hashmap (make-hash-table :test 'equal)))
-    (dolist (app (global-interactive-run-app--find-all-apps))
-      (let ((key (intern app))
-            (value app))
-        (puthash key value hashmap)))
-    hashmap))
+(defun global-interactive-app-table (value)
+  (print value)
+  (let ((table (make-hash-table :test #'equal)))
+    (mapc
+     (lambda (app)
+       (puthash app
+                (global-interactive-emacs-candidate
+                 :key app
+                 :value app
+                 :next-table nil
+                 :next-func #'global-interactive-run-app)
+                table))
+     (global-interactive-run-app--find-all-apps))
+    (print table)
+    table))
 
-(defun global-interactive-run-app--update-candidates ()
-  "Update url candidates."
-  (puthash 'run-app (global-interactive-run-apps-hashtable) global-interactive-emacs--actions-table)
-  (puthash 'run-app 'global-interactive-run-app global-interactive-emacs--actions-func))
-
-(advice-add 'global-interactive-emacs--update-candidates :before #'global-interactive-run-app--update-candidates)
+(puthash
+ "Run App"
+ (global-interactive-emacs-candidate
+  :key "Run App"
+  :value "Run App"
+  :next-table nil
+  :next-func #'global-interactive-app-table)
+ global-interactive-emacs--candidates-table)
 
 (provide 'global-interactive-run-app)
 ;;; global-interactive-run-app.el ends here

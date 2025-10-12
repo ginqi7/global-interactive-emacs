@@ -39,17 +39,29 @@
   (kill-new (shell-command-to-string (string-trim (format "rbw get %s" item))))
   (global-interactive-emacs-quit-back))
 
-(defun global-interactive-password-hashtable ()
+(defun global-interactive-password-table (_)
   "Build hash table."
   (let ((hashmap (make-hash-table :test 'equal)))
     (dolist (item (global-interactive-password--list))
-      (let ((key (intern (concat (gethash "name" item) "#" (gethash "user" item))))
-            (value (gethash "name" item)))
-        (puthash key value hashmap)))
+      (let ((key (concat (gethash "name" item) "#" (gethash "user" item)))
+            (value (gethash "id" item)))
+        (puthash key
+                 (global-interactive-emacs-candidate
+                  :key key
+                  :value value
+                  :next-table nil
+                  :next-func #'global-interactive-password-copy)
+                 hashmap)))
     hashmap))
 
-
-(advice-add 'global-interactive-emacs--update-candidates :before #'global-interactive-password--update-candidates)
+(puthash
+ "Copy Password"
+ (global-interactive-emacs-candidate
+  :key "Copy Password"
+  :value "Copy Password"
+  :next-table nil
+  :next-func #'global-interactive-password-table)
+ global-interactive-emacs--candidates-table)
 
 (provide 'global-interactive-password)
 ;;; global-interactive-password.el ends here
