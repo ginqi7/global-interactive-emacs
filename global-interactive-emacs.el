@@ -47,6 +47,14 @@
    (next-table :initarg :next-table)
    (next-func :initarg :next-func)))
 
+(defclass global-interactive-emacs-input ()
+  ((separator :initarg :separator)
+   (raw :initarg :raw)
+   (type :initarg :type)
+   (link :initarg :link)
+   (prev :initarg :prev)
+   (updated :initarg :updated)))
+
 (cl-defmethod gie-candidate-next ((candidate global-interactive-emacs-candidate))
   (let ((table (eieio-oref candidate 'next-table)))
     (unless table
@@ -56,13 +64,45 @@
     (eieio-oset candidate 'next-table table)
     table))
 
+(cl-defmethod gie-input-update ((input global-interactive-emacs-input) raw-str)
+  (let* ((prev (eieio-oref input 'raw))
+         (link (split-string
+                raw-str
+                (concat "\\" global-interactive-emacs-input-separator)))
+         (updated (not (string= prev raw-str))))
+    (eieio-oset input 'raw raw-str)
+    (eieio-oset input 'prev prev)
+    (eieio-oset input 'updated updated)
+    (eieio-oset input 'link link)
+    input))
+
+(cl-defmethod gie-candidate-to-input-buffer ((candidate global-interactive-emacs-candidate)
+                                             (input global-interactive-emacs-input))
+  (let ((key (eieio-oref candidate 'key))
+        (link (eieio-oref input 'link))
+        (raw))
+    (setq link (append (butlast link) (list key)))
+    (setq raw (concat
+               (string-join link global-interactive-emacs-input-separator)
+               global-interactive-emacs-input-separator))
+    (global-interactive-emacs--insert-input raw t)))
+
 (defvar global-interactive-emacs--candidates nil "Candidates.")
 (defvar global-interactive-emacs--candidates-timer nil "Candidates update Timer.")
-(defvar global-interactive-emacs--last-input "" "Last input.")
-(defvar global-interactive-emacs--input-link nil "Input link.")
 (defvar global-interactive-emacs--selected-index 0 "Selected index.")
 (defvar global-interactive-emacs--selected-overlay nil "Selected overlay.")
 (defvar global-interactive-emacs--last-app nil "Last front app.")
+
+(defvar global-interactive-emacs--input
+  (global-interactive-emacs-input
+   :separator global-interactive-emacs-input-separator
+   :raw ""
+   :type ""
+   :link '("")
+   :prev ""
+   :updated nil)
+  "input.")
+
 
 (defvar global-interactive-emacs--buffers
   (make-hash-table :test 'equal)
@@ -75,46 +115,27 @@
   (make-hash-table :test 'equal)
   "Actions table.")
 
-(defvar global-interactive-emacs--actions-func
-  (make-hash-table :test 'equal)
-  "Action func.")
-
-(defvar global-interactive-emacs--cur-action-func nil
-  "Current action func.")
-
-(defun global-interactive-emacs--input-update-p ()
-  "Update."
-  (not (string=
-        (global-interactive-emacs--get-input)
-        global-interactive-emacs--last-input)))
-
 (defun global-interactive-emacs-update ()
   "Update."
-  (when (global-interactive-emacs--input-update-p)
-    (setq global-interactive-emacs--last-input
-          (global-interactive-emacs--get-input))
+  (gie-input-update global-interactive-emacs--input
+                    (global-interactive-emacs--get-input))
+  (when (eieio-oref global-interactive-emacs--input 'updated)
     (global-interactive-emacs--update-candidates)
     (global-interactive-emacs--update-candidates-buffer)
     (global-interactive-emacs--update-candidates-frame)))
-
-(defun global-interactive-emacs-reset-input ()
-  "Reset intput."
-  (interactive)
-  (let ((input-buffer
-         (gethash 'input global-interactive-emacs--buffers)))
-    (when input-buffer
-      (with-current-buffer input-buffer (erase-buffer)))))
 
 (defun global-interactive-emacs--insert-input-separator ()
   "Reset intput."
   (interactive)
   (global-interactive-emacs--insert-input global-interactive-emacs-input-separator))
 
-(defun global-interactive-emacs--insert-input (str)
+(defun global-interactive-emacs--insert-input (str &optional erase)
   "Insert STR intput."
   (let ((input-buffer
          (gethash 'input global-interactive-emacs--buffers)))
     (when input-buffer
+      (when erase
+        (erase-buffer))
       (with-current-buffer input-buffer (insert str)))))
 
 (defun global-interactive-emacs--create-candidate (name comment func)
@@ -142,22 +163,13 @@
           (global-interactive-emacs--extract
            (completion-all-completions str (hash-table-keys table) nil nil))))
 
-(defun global-interactive-emacs--add-current-action-func (candidates)
-  "Add current action func for CANDIDATES."
-  (when candidates
-    (setq global-interactive-emacs--cur-action-func
-          (gethash
-           (intern (car candidates))
-           global-interactive-emacs--actions-func))))
 
 (defun global-interactive-emacs--update-candidates ()
   "Update candidates."
   (setq global-interactive-emacs--candidates nil)
-  (let* ((input (global-interactive-emacs--get-input))
-         (input (if input input ""))
-         (input-link
-          (append global-interactive-emacs--input-link
-                  (split-string input "\\.")))
+  (let* ((input-link (eieio-oref
+                      global-interactive-emacs--input
+                      'link))
          (hashtable global-interactive-emacs--candidates-table)
          (candidates
           (global-interactive-emacs--filter
@@ -184,7 +196,7 @@
 (defun global-interactive-emacs--get-input ()
   "Update candidates."
   (let ((input-buffer
-         (gethash 'input global-interactive-emacs--buffers)))
+         (gethash 'input global-interactive-emacs--buffers)))    
     (when input-buffer
       (with-current-buffer input-buffer
         (buffer-substring-no-properties (point-min) (point-max))))))
@@ -195,7 +207,6 @@
       (delete-overlay global-interactive-emacs--selected-overlay))
   (goto-char (point-min))
   (forward-line global-interactive-emacs--selected-index)
-  ;; (recenter)
   (setq global-interactive-emacs--selected-overlay
         (make-overlay (line-beginning-position) (line-end-position)))
   (overlay-put
@@ -245,17 +256,6 @@
          (gethash 'input global-interactive-emacs--frames)))
     (make-frame-visible input-frame)
     (global-interactive-emacs--reset-candidates-timer)))
-
-(defun global-interactive-emacs-pointer ()
-  "Global Interactive Emacs in current pointer."
-  (interactive)
-  (global-interactive-emacs)
-  (let ((pointer-position (macc-mouse-position)))
-    (print pointer-position)
-    (set-frame-position
-     (gethash 'input global-interactive-emacs--frames)
-     (truncate (car pointer-position))
-     (truncate (cdr pointer-position)))))
 
 (defun global-interactive-emacs-quit-back ()
   (interactive)
@@ -307,8 +307,9 @@
                global-interactive-emacs--candidates))
          (table (gie-candidate-next selected-candidate)))
     (if (hash-table-p table)
-        (global-interactive-emacs--insert-input
-         (eieio-oref selected-candidate 'key))
+        (gie-candidate-to-input-buffer
+         selected-candidate
+         global-interactive-emacs--input)
       (global-interactive-emacs-quit))))
 
 (define-minor-mode global-interactive-emacs-input-mode
@@ -318,6 +319,9 @@
             (define-key map
                         (kbd "RET")
                         #'global-interactive-emacs-run-selected-candidate)
+            (define-key map
+                        (kbd "<TAB>")
+                        #'global-interactive-emacs-run-selected-candidate)
             (define-key map (kbd "C-g") #'global-interactive-emacs-quit-back)
             (define-key map
                         (kbd "C-p")
@@ -326,12 +330,6 @@
                         (kbd "C-n")
                         #'global-interactive-emacs-select-next)
             map))
-
-(defun global-interactive-file-to-string(file-name)
-  "Convert content of FILE-NAME to string."
-  (with-temp-buffer
-    (insert-file-contents file-name)
-    (buffer-substring-no-properties (point-min) (point-max))))
 
 (provide 'global-interactive-emacs)
 ;;; global-interactive-emacs.el ends here
