@@ -136,7 +136,6 @@
       (push (car current) result))
     (nreverse result)))
 
-
 (defun global-interactive-emacs--filter (str table)
   "Filter elements by STR in TABLE."
   (mapcar (lambda (key) (gethash key table))
@@ -150,30 +149,6 @@
           (gethash
            (intern (car candidates))
            global-interactive-emacs--actions-func))))
-
-(defun global-interactive-emacs--auto-add-separator (candidates hashtable)
-  "Auto add separator for CANDIDATES and HASHTABLE."
-  (when (and
-         (= 1 (length candidates))
-         (hash-table-p
-          (gethash (intern (car candidates)) hashtable)))
-    (global-interactive-emacs--insert-input-separator)))
-
-(defun global-interactive-emacs--update-show-candidates (candidates hashtable)
-  "Update show CANDIDATES in HASHTABLE."
-  (setq global-interactive-emacs--candidates
-        (mapcar
-         (lambda (name)
-           (global-interactive-emacs--create-candidate
-            name
-            (symbol-name (type-of (gethash (intern name) hashtable)))
-            `(lambda ()
-               (interactive)
-               (funcall
-                ',global-interactive-emacs--cur-action-func
-                ,(gethash (intern name) hashtable)))))
-         
-         candidates)))
 
 (defun global-interactive-emacs--update-candidates ()
   "Update candidates."
@@ -198,19 +173,6 @@
                  (nth (1+ i) input-link)
                  hashtable)))))
     (setq global-interactive-emacs--candidates candidates)))
-;; (global-interactive-emacs--add-current-action-func candidates)
-;; (dotimes (i (1- (length input-link)))
-;;   (when candidates
-;;     (when (hash-table-p hashtable)
-;;       (setq hashtable
-;;             (gethash (intern (car candidates)) hashtable)))
-;;     (setq candidates
-;;           (global-interactive-emacs--filter
-;;            (nth (1+ i) input-link)
-;;            hashtable))))
-;; (global-interactive-emacs--auto-add-separator candidates hashtable)))
-;; (global-interactive-emacs--update-show-candidates candidates hashtable)
-
 
 (defun global-interactive-emacs--reset-candidates-timer ()
   "Reset candidates timer."
@@ -250,32 +212,9 @@
         (let ()
           (dolist (candidate global-interactive-emacs--candidates)
             (insert (eieio-oref candidate 'key))
-            ;; (dotimes (_
-            ;;           (- max-length
-            ;;              (global-interactive-emacs--candidate-length candidate)))
-            ;;   (insert " "))
-
-            ;; (insert (gethash 'comment candidate))
             (insert "\n")))
         (global-interactive-emacs--mark-selected-candidate)))))
 
-(defun global-interactive-emacs--candidate-length (candidate)
-  "Get CANDIDATE length."
-  (+
-   (length (gethash 'name candidate))
-   (length (gethash 'comment candidate))))
-
-(defun global-interactive-emacs--candidates-max-length (candidates)
-  "Get CANDIDATES max length."
-  (if candidates
-      (apply 'max
-             (mapcar
-              (lambda (element)
-                (+
-                 (global-interactive-emacs--candidate-length element)
-                 4))
-              candidates))
-    '(0)))
 
 (defun global-interactive-emacs--buffer-new (name)
   "Create buffer by NAME."
