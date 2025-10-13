@@ -59,9 +59,20 @@
       (set-frame-position candidates-frame 0 (frame-char-height input-frame))
       (set-frame-height candidates-frame
                         (min 30 (floor (* 1.5 (length global-interactive-emacs--candidates)))))
+      (set-frame-width candidates-frame
+                       (global-interactive-emacs-frame--candidates-width
+                        global-interactive-emacs--candidates)
+                       nil t)
       (make-frame-visible candidates-frame)
       (select-frame-set-input-focus input-frame))))
 
+(defun global-interactive-emacs-frame--candidates-width (candidates)
+  (let* ((candidates-buffer
+          (gethash 'candidates global-interactive-emacs--buffers))
+         (display-strs (mapcar (lambda (candidate) (eieio-oref candidate 'key)) candidates))
+         (max-pixel-width
+          (apply #'max (mapcar (lambda (str) (string-pixel-width str candidates-buffer)) display-strs))))
+    max-pixel-width))
 
 (defun global-interactive-emacs--buffer-new (name)
   "Create buffer by NAME."
