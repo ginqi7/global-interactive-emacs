@@ -50,29 +50,46 @@
   "Refresh candidates frame."
   (let* ((input-frame
           (gethash 'input global-interactive-emacs--frames))
-         (input-frame-position)
          (candidates-frame
           (gethash 'candidates global-interactive-emacs--frames)))
+    
     (when (and input-frame candidates-frame)
-      (setq input-frame-position (frame-position input-frame))
       (set-frame-parameter candidates-frame 'parent-frame input-frame)
-      (set-frame-position candidates-frame 0 (frame-char-height input-frame))
-      (set-frame-height candidates-frame
-                        (min 30 (floor (* 1.5 (length global-interactive-emacs--candidates)))))
+      (set-frame-position candidates-frame 0 (+ 5 (frame-char-height input-frame)))
+      (set-frame-height candidates-frame (min 30 (floor (* 1.5 (length global-interactive-emacs--candidates)))))
       (set-frame-width candidates-frame
                        (global-interactive-emacs-frame--candidates-width
                         global-interactive-emacs--candidates)
                        nil t)
       (make-frame-visible candidates-frame)
+      (select-frame-set-input-focus input-frame)))
+  (global-interactive-emacs--update-preview-frame))
+
+(defun global-interactive-emacs--update-preview-frame ()
+  (let* ((input-frame
+          (gethash 'input global-interactive-emacs--frames))
+         (candidates-frame
+          (gethash 'candidates global-interactive-emacs--frames))
+         (preview-frame
+          (gethash 'preview global-interactive-emacs--frames)))
+    (when (and input-frame candidates-frame preview-frame)
+      (set-frame-parameter preview-frame 'parent-frame input-frame)
+      (set-frame-position preview-frame (+ 2 (frame-pixel-width candidates-frame)) (+ 5 (frame-char-height input-frame)))
+      (set-frame-height preview-frame
+                        300 nil t)
+      (set-frame-width preview-frame 500
+                       nil t)
+      (make-frame-visible preview-frame)
       (select-frame-set-input-focus input-frame))))
 
 (defun global-interactive-emacs-frame--candidates-width (candidates)
-  (let* ((candidates-buffer
-          (gethash 'candidates global-interactive-emacs--buffers))
-         (display-strs (mapcar (lambda (candidate) (eieio-oref candidate 'key)) candidates))
-         (max-pixel-width
-          (apply #'max (mapcar (lambda (str) (string-pixel-width str candidates-buffer)) display-strs))))
-    max-pixel-width))
+  (min 500 (or (when-let* ((candidates-buffer
+                            (gethash 'candidates global-interactive-emacs--buffers))
+                           (display-strs (mapcar (lambda (candidate) (eieio-oref candidate 'key)) candidates))
+                           (max-pixel-width
+                            (apply #'max (mapcar (lambda (str) (string-pixel-width str candidates-buffer)) display-strs))))
+                 max-pixel-width)
+               0)))
 
 (defun global-interactive-emacs--buffer-new (name)
   "Create buffer by NAME."

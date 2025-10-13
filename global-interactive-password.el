@@ -50,6 +50,8 @@
                   :key key
                   :value value
                   :next-table nil
+                  :preview (lambda (id)
+                             (string-join (cdr (string-split (shell-command-to-string (format "rbw get --full %s" id)))) "\n"))
                   :next-func #'global-interactive-password-copy)
                  hashmap)))
     hashmap))
@@ -60,6 +62,8 @@
   :key "Copy Password"
   :value "Copy Password"
   :next-table nil
+  :preview (lambda (_) (format "Search and Copy password. %s"
+                               (shell-command-to-string "rbw  unlocked")))
   :next-func #'global-interactive-password-table)
  global-interactive-emacs--candidates-table)
 

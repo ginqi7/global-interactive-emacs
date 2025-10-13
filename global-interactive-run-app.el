@@ -82,6 +82,8 @@
   :key "Run App"
   :value "Run App"
   :next-table nil
+  :preview (lambda (_) "" (format "Open a installed APP, there are %s apps"
+                                  (length (global-interactive-run-app--find-all-apps))))
   :next-func #'global-interactive-app-table)
  global-interactive-emacs--candidates-table)
 

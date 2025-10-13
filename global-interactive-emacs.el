@@ -44,6 +44,7 @@
 (defclass global-interactive-emacs-candidate ()
   ((key :initarg :key)
    (value :initarg :value)
+   (preview :initarg :preview)
    (next-table :initarg :next-table)
    (next-func :initarg :next-func)))
 
@@ -121,7 +122,10 @@
   (when (eieio-oref global-interactive-emacs--input 'updated)
     (global-interactive-emacs--update-candidates)
     (global-interactive-emacs--update-candidates-buffer)
-    (global-interactive-emacs--update-candidates-frame)))
+    (global-interactive-emacs--update-candidates-frame)
+    (global-interactive-emacs--update-preview-buffer)
+    (global-interactive-emacs--update-preview-frame)))
+
 
 (defun global-interactive-emacs--insert-input-separator ()
   "Reset intput."
@@ -228,6 +232,21 @@
             (insert "\n")))
         (global-interactive-emacs--mark-selected-candidate)))))
 
+(defun global-interactive-emacs--update-preview-buffer ()
+  "Refresh preview buffer."
+  (let ((prewview-buffer
+         (gethash 'preview global-interactive-emacs--buffers)))
+    (when prewview-buffer
+      (with-current-buffer prewview-buffer
+        (erase-buffer)
+        (when-let* ((selected-candidate
+                     (nth global-interactive-emacs--selected-index
+                          global-interactive-emacs--candidates))
+                    (preview-func
+                     (and (slot-boundp selected-candidate 'preview)
+                          (eieio-oref selected-candidate 'preview)))
+                    (arg (eieio-oref selected-candidate 'value)))
+          (insert (funcall preview-func arg)))))))
 
 (defun global-interactive-emacs--buffer-new (name)
   "Create buffer by NAME."
@@ -275,8 +294,8 @@
     (kill-buffer buffer))
 
   (clrhash global-interactive-emacs--frames)
-  (clrhash global-interactive-emacs--buffers)
-  )
+  (clrhash global-interactive-emacs--buffers))
+
 
 (defun global-interactive-emacs-select-next ()
   "Select next candidate."
@@ -287,6 +306,7 @@
            global-interactive-emacs--candidates
            global-interactive-emacs--selected-index)
     (setq global-interactive-emacs--selected-index 0))
+  (global-interactive-emacs--update-preview-buffer)
   (global-interactive-emacs--update-candidates-buffer))
 
 (defun global-interactive-emacs-select-previous ()
@@ -294,9 +314,10 @@
   (interactive)
   (setq global-interactive-emacs--selected-index
         (1- global-interactive-emacs--selected-index))
-  (unless (> global-interactive-emacs--selected-index 0)
+  (unless (>= global-interactive-emacs--selected-index 0)
     (setq global-interactive-emacs--selected-index
           (1- (length global-interactive-emacs--candidates))))
+  (global-interactive-emacs--update-preview-buffer)
   (global-interactive-emacs--update-candidates-buffer))
 
 (defun global-interactive-emacs-run-selected-candidate ()
