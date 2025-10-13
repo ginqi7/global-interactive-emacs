@@ -88,7 +88,6 @@
     (global-interactive-emacs--insert-input raw t)))
 
 (defvar global-interactive-emacs--candidates nil "Candidates.")
-(defvar global-interactive-emacs--candidates-timer nil "Candidates update Timer.")
 (defvar global-interactive-emacs--selected-index 0 "Selected index.")
 (defvar global-interactive-emacs--selected-overlay nil "Selected overlay.")
 (defvar global-interactive-emacs--last-app nil "Last front app.")
@@ -186,12 +185,15 @@
                  hashtable)))))
     (setq global-interactive-emacs--candidates candidates)))
 
-(defun global-interactive-emacs--reset-candidates-timer ()
-  "Reset candidates timer."
-  (when global-interactive-emacs--candidates-timer
-    (cancel-timer global-interactive-emacs--candidates-timer))
-  (setq global-interactive-emacs--candidates-timer
-        (run-at-time t 0.5 'global-interactive-emacs-update)))
+(defun global-interactive-emacs--init-input-buffer-watcher ()
+  (let ((input-buffer
+         (gethash 'input global-interactive-emacs--buffers)))    
+    (when input-buffer
+      (with-current-buffer input-buffer
+        (add-hook 'after-change-functions
+                  (lambda (start end length)
+                    (global-interactive-emacs-update))
+                  nil t)))))
 
 (defun global-interactive-emacs--get-input ()
   "Update candidates."
@@ -255,7 +257,7 @@
   (let ((input-frame
          (gethash 'input global-interactive-emacs--frames)))
     (make-frame-visible input-frame)
-    (global-interactive-emacs--reset-candidates-timer)))
+    (global-interactive-emacs--init-input-buffer-watcher)))
 
 (defun global-interactive-emacs-quit-back ()
   (interactive)
@@ -274,9 +276,7 @@
 
   (clrhash global-interactive-emacs--frames)
   (clrhash global-interactive-emacs--buffers)
-
-  (when global-interactive-emacs--candidates-timer
-    (cancel-timer global-interactive-emacs--candidates-timer)))
+  )
 
 (defun global-interactive-emacs-select-next ()
   "Select next candidate."
