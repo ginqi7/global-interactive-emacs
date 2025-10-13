@@ -39,26 +39,47 @@
 
 (require 'global-interactive-emacs)
 
+(defvar global-interactive-kill-app--script-path
+  (file-name-concat (file-name-directory (or load-file-name (buffer-file-name)))
+                    "list_running_app.sh"))
+
 (defun global-interactive-kill-app--running-apps ()
   "List all running apps in system."
-  (macc-list-all-running-apps))
+  (split-string (shell-command-to-string
+                 (format "%s %s"
+                         (executable-find "sh")
+                         global-interactive-kill-app--script-path))
+                "\n" t))
 
+(defun global-interactive-kill-app (app)
+  "Open a APP."
+  (do-applescript (format "tell application \"%s\" to quit" app))
+  (global-interactive-emacs-quit-back))
 
-(defun global-interactive-running-apps-hashtable ()
-  "Build hash table."
-  (let ((hashmap (make-hash-table :test 'equal)))
-    (dolist (app (global-interactive-kill-app--running-apps))
-      (let ((key (intern app))
-            (value app))
-        (puthash key value hashmap)))
-    hashmap))
+(defun global-interactive-app-table (value)
+  (let ((table (make-hash-table :test #'equal)))
+    (mapc
+     (lambda (app)
+       (puthash app
+                (global-interactive-emacs-candidate
+                 :key app
+                 :value app
+                 :next-table nil
+                 :next-func #'global-interactive-kill-app)
+                table))
+     (global-interactive-kill-app--running-apps))
+    table))
 
-(defun global-interactive-kill-app--update-candidates ()
-  "Update url candidates."
-  (puthash 'kill-app (global-interactive-running-apps-hashtable) global-interactive-emacs--actions-table)
-  (puthash 'kill-app 'macc-kill-app global-interactive-emacs--actions-func))
-
-(advice-add 'global-interactive-emacs--update-candidates :before #'global-interactive-kill-app--update-candidates)
+(puthash
+ "Kill App"
+ (global-interactive-emacs-candidate
+  :key "Kill App"
+  :value "Kill App"
+  :next-table nil
+  :preview (lambda (_) "" (format "Kill a running APP, there are %s running apps"
+                                  (length (global-interactive-kill-app--running-apps))))
+  :next-func #'global-interactive-app-table)
+ global-interactive-emacs--candidates-table)
 
 (provide 'global-interactive-kill-app)
 ;;; global-interactive-kill-app.el ends here
