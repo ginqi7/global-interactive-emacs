@@ -302,10 +302,10 @@
 (defun global-interactive-emacs-run-selected-candidate ()
   "Run selected candidate."
   (interactive)
-  (let* ((selected-candidate
-          (nth global-interactive-emacs--selected-index
-               global-interactive-emacs--candidates))
-         (table (gie-candidate-next selected-candidate)))
+  (when-let* ((selected-candidate
+               (nth global-interactive-emacs--selected-index
+                    global-interactive-emacs--candidates))
+              (table (gie-candidate-next selected-candidate)))
     (if (hash-table-p table)
         (gie-candidate-to-input-buffer
          selected-candidate
