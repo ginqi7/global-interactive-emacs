@@ -60,7 +60,7 @@
   "Open a APP."
   (shell-command (format "open -a \"%s\"" app)))
 
-(defun global-interactive-app-table (value)
+(defun global-interactive-installed-app-table (value)
   (let ((table (make-hash-table :test #'equal)))
     (mapc
      (lambda (app)
@@ -82,7 +82,7 @@
   :next-table nil
   :preview (lambda (_) "" (format "Open a installed APP, there are %s apps"
                                   (length (global-interactive-run-app--find-all-apps))))
-  :next-func #'global-interactive-app-table)
+  :next-func #'global-interactive-installed-app-table)
  global-interactive-emacs--candidates-table)
 
 (provide 'global-interactive-run-app)

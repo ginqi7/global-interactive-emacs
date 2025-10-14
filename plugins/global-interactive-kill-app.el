@@ -56,7 +56,7 @@
   (do-applescript (format "tell application \"%s\" to quit" app))
   (global-interactive-emacs-quit-back))
 
-(defun global-interactive-app-table (value)
+(defun global-interactive-running-app-table (value)
   (let ((table (make-hash-table :test #'equal)))
     (mapc
      (lambda (app)
@@ -78,7 +78,7 @@
   :next-table nil
   :preview (lambda (_) "" (format "Kill a running APP, there are %s running apps"
                                   (length (global-interactive-kill-app--running-apps))))
-  :next-func #'global-interactive-app-table)
+  :next-func #'global-interactive-running-app-table)
  global-interactive-emacs--candidates-table)
 
 (provide 'global-interactive-kill-app)

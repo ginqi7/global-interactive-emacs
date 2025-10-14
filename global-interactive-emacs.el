@@ -57,12 +57,10 @@
    (updated :initarg :updated)))
 
 (cl-defmethod gie-candidate-next ((candidate global-interactive-emacs-candidate))
-  (let ((table (eieio-oref candidate 'next-table)))
-    (unless table
-      (setq table (funcall
-                   (eieio-oref candidate 'next-func)
-                   (eieio-oref candidate 'value))))
-    (eieio-oset candidate 'next-table table)
+  (let ((table (funcall
+                (eieio-oref candidate 'next-func)
+                (eieio-oref candidate 'value))))
+    ;; (eieio-oset candidate 'next-table table)
     table))
 
 (cl-defmethod gie-input-update ((input global-interactive-emacs-input) raw-str)
