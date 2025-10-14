@@ -107,7 +107,7 @@
                  :next-func #'global-interactive-browser-tab-actions
                  :preview (lambda (tab) (format "Title: %s\nURL:%s\n"
                                                 (gethash "title" tab)
-                                                (gethash "id" tab))))
+                                                (gethash "url" tab))))
                 table))
      (global-interactive-browser-tab-all))
     table))
