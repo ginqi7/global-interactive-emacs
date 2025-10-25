@@ -20,7 +20,7 @@
 
 ;;; Commentary:
 
-;; 
+;;
 
 ;;; Commands:
 ;;
@@ -39,7 +39,15 @@
 (require 'global-interactive-emacs)
 (add-to-list 'global-interactive-default-command
              (list "Find File" #'global-interactive-find-file))
+
 (defvar global-interactive-find-file-base-directory "~/")
+
+(defvar global-interactive-find-file-actions
+  '("Copy File Simple Name"
+    "Copy File Full Name"
+    "Copy File Path"
+    "Copy File Content"
+    "Open file"))
 
 
 (defun global-interactive-parse-ls-single (file-item)
@@ -83,22 +91,16 @@ BASE-PATH is last ls' path."
   "Do some action in file named 'FILE-PATH'."
   (let ((selected-item
          (completing-read "Please Select an action for file: "
-                          '("Copy File Simple Name"
-                            "Copy File Full Name"
-                            "Copy File Path"
-                            "Copy File Content"
-                            "Open file"))))
-    (cond
-     ((string= selected-item "Copy File Directory Path")
-      (kill-new (file-name-directory file-path)))
-     ((string= selected-item "Copy File Simple Name")
-      (kill-new (car (last (split-string file-path "/" t " +")))))
-     ((string= selected-item "Copy File Full Name")
-      (kill-new file-path))
-     ((string= selected-item "Copy File Content")
-      (kill-new (global-interactive-file-to-string file-path)))
-     ((string= selected-item "Open file")
-      (shell-command-to-string (format "open %s" file-path))))))
+                          global-interactive-find-file-actions)))
+
+    (pcase (cl-position selected-item global-interactive-find-file-actions :test #'string=)
+
+      (0 (kill-new (file-name-directory file-path)))
+      (1
+       (kill-new (car (last (split-string file-path "/" t " +")))))
+      (2 (kill-new file-path))
+      (3 (kill-new (global-interactive-file-to-string file-path)))
+      (4 (shell-command-to-string (format "open %s" file-path))))))
 
 (defun global-interactive-find-file (&optional file-path)
   "Global interactively find file and do an action on this file.
