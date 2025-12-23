@@ -2,6 +2,9 @@
 #+author: Qiqi Jin
 #+language: en
 
+*NOTE*:
+As I have completely redeveloped [[https://github.com/ginqi7/e-spotlight][e-spotlight]], this project has been archived. Given the fundamental changes in its principles, we will be launching a new project.
+
 This tool is inspired by article : [[https://isamert.net/2022/03/16/global-interactive-emacs-functions.html][Global interactive Emacs functions]]. It provides an idea to run Emacs functions outside of Emacs.
 
 So I try to use this idea to wrtie a tool like [[https://www.obdev.at/products/launchbar/index.html][lauchbar]] or [[https://www.alfredapp.com/][Alfred]]. It can help user to quickly lauch app or run work flow.  
